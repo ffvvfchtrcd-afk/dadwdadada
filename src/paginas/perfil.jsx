@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contextos/contexto_autenticacao';
 import { ServicoPedidos } from '../servicos/servico_pedidos';
 import { FormatarMoeda } from '../utilitarios/formatadores';
-import { Clipboard, CheckCircle, Package, Clock, ShieldAlert, User, Mail, Wallet, LayoutDashboard } from 'lucide-react';
+import { Clipboard, CheckCircle, Package, Clock, ShieldAlert, User, Wallet, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Perfil() {
@@ -85,9 +85,7 @@ export default function Perfil() {
                 <span className="text-[10px] text-zinc-500 font-mono">ID: {usuario.id}</span>
               </div>
             </div>
-            <div className="mt-3 flex items-center gap-2 text-xs text-zinc-400">
-              <Mail size={14} /> {usuario.email}
-            </div>
+
           </div>
 
           {/* Saldo e Status */}

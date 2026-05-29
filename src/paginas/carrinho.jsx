@@ -66,7 +66,7 @@ export default function Carrinho() {
           pedidoIds,
           total,
           limparCarrinho: true,
-          email: usuario?.email || ''
+          email: usuario?.nome ? `${usuario.nome}@nexmarket.com` : 'cliente@nexmarket.com'
         }));
         navigate("/checkout");
       } else {

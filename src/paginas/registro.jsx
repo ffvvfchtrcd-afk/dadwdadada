@@ -5,7 +5,6 @@ import { ShieldCheck, ArrowRight, UserPlus, Info } from 'lucide-react';
 
 export default function Registro() {
   const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,7 +23,7 @@ export default function Registro() {
 
     setLoading(true);
     try {
-      const res = await registrar(nome, email, senha);
+      const res = await registrar(nome, senha);
       if (res.sucesso) {
         navigate('/');
       } else {
@@ -68,17 +67,6 @@ export default function Registro() {
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               placeholder="ex: joao_revendedor" 
-              className="input-padrao w-full text-xs font-bold py-3.5"
-            />
-          </div>
-
-          <div>
-            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">E-mail (Opcional)</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ex: contato@gmail.com" 
               className="input-padrao w-full text-xs font-bold py-3.5"
             />
           </div>
@@ -137,4 +125,3 @@ export default function Registro() {
     </div>
   );
 }
-

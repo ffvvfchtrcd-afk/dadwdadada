@@ -3,13 +3,12 @@ import { ServicoLogs } from './servico_logs';
 
 export const ServicoAutenticacao = {
   // Realiza login pesquisando na tabela 'users'
-  async login(emailOuNome, senha) {
+  async login(nome, senha) {
     try {
-      if (!emailOuNome || !senha) {
+      if (!nome || !senha) {
         throw new Error("Preencha todos os campos.");
       }
 
-      // Busca todos os usuários ativos
       const { data: users, error } = await supabase
         .from('users')
         .select('*')
@@ -19,10 +18,8 @@ export const ServicoAutenticacao = {
         throw new Error(error.message);
       }
 
-      // Procura correspondência por e-mail ou nome (case-insensitive)
       const usuarioEncontrado = users.find(u => 
-        (u.email?.toLowerCase() === emailOuNome.toLowerCase() || 
-         u.nome?.toLowerCase() === emailOuNome.toLowerCase()) &&
+        u.nome?.toLowerCase() === nome.toLowerCase() &&
         u.senha === senha
       );
 
@@ -50,28 +47,18 @@ export const ServicoAutenticacao = {
   },
 
   // Cadastra um novo usuário na tabela 'users'
-  async registrar(nome, email, senha) {
+  async registrar(nome, senha) {
     try {
       if (!nome || !senha) {
         throw new Error("Nome e Senha são obrigatórios.");
       }
 
-      // Busca usuários para validação de duplicidade
       const { data: users, error } = await supabase
         .from('users')
         .select('*');
 
       if (error) {
         throw new Error(error.message);
-      }
-
-      const emailFinal = email && email.trim() !== '' 
-        ? email.trim() 
-        : `user-${Date.now()}@nexmarket.com`;
-
-      // Verifica se e-mail ou nome já existem
-      if (email && users.find(u => u.email?.toLowerCase() === emailFinal.toLowerCase())) {
-        throw new Error("E-mail já cadastrado.");
       }
 
       if (users.find(u => u.nome?.toLowerCase() === nome.toLowerCase())) {
@@ -81,7 +68,7 @@ export const ServicoAutenticacao = {
       const novoUsuario = {
         id: Date.now(),
         nome: nome.trim(),
-        email: emailFinal,
+        email: `user-${Date.now()}@nexmarket.com`,
         senha: senha,
         role: 'USER',
         cargo: 'CLIENTE',

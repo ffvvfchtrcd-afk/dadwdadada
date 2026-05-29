@@ -175,7 +175,7 @@ const FERRAMENTAS = [
     type: 'function',
     function: {
       name: 'entregar_pedido',
-      description: 'Marca um pedido como ENTREGUE. Primeiro pergunte o ID/email e o conteúdo a ser entregue.',
+      description: 'Marca um pedido como ENTREGUE. Primeiro pergunte o ID e o conteúdo a ser entregue.',
       parameters: {
         type: 'object',
         properties: {
@@ -425,7 +425,7 @@ async function executar(nome, args) {
           status: 'ENTREGUE', dateDelivered: new Date().toISOString(), timeline, deliveryContent: conteudo
         }).eq('id', args.pedidoId);
         if (updateErr) return { sucesso: false, erro: msgAmigavel(updateErr.message) };
-        return { sucesso: true, dados: { id: args.pedidoId, status: 'ENTREGUE', itens: conteudo.length, cliente: pedido.userEmail || pedido.userName || 'N/A' } };
+        return { sucesso: true, dados: { id: args.pedidoId, status: 'ENTREGUE', itens: conteudo.length, cliente: pedido.userName || 'N/A' } };
       }
       case 'estatisticas_loja': {
         const [compras, products, users] = await Promise.all([
@@ -458,7 +458,10 @@ async function executar(nome, args) {
           comprasPorEmail[email].pedidos++;
         });
         const usuarios = (data || []).map(u => ({
-          ...u,
+          id: u.id,
+          nome: u.nome,
+          role: u.role,
+          criado_em: u.criado_em,
           totalGasto: comprasPorEmail[u.email]?.total || 0,
           totalPedidos: comprasPorEmail[u.email]?.pedidos || 0
         }));

@@ -146,7 +146,6 @@ export default function GerenciarUsuarios() {
               <thead>
                 <tr className="border-b border-gray-800 text-gray-400 font-bold uppercase">
                   <th className="py-3 px-4">Nome</th>
-                  <th className="py-3 px-4">E-mail</th>
                   <th className="py-3 px-4">Saldo</th>
                   <th className="py-3 px-4">Cargo</th>
                   <th className="py-3 px-4">Status</th>
@@ -157,7 +156,6 @@ export default function GerenciarUsuarios() {
                 {usuarios.map((u) => (
                   <tr key={u.id} className="border-b border-gray-900 hover:bg-black/20">
                     <td className="py-3 px-4 text-white font-bold">{u.nome}</td>
-                    <td className="py-3 px-4 text-gray-400">{u.email}</td>
                     <td className="py-3 px-4 font-cartoon text-white">{FormatarMoeda(u.saldo || 0)}</td>
                     <td className="py-3 px-4 text-gray-300">{u.role || 'USER'}</td>
                     <td className="py-3 px-4">

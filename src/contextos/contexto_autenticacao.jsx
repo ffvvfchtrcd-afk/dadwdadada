@@ -51,9 +51,9 @@ export function AuthProvider({ children }) {
     return () => clearInterval(interval);
   }, []);
 
-  const entrar = async (email, senha) => {
+  const entrar = async (nome, senha) => {
     setCarregando(true);
-    const res = await ServicoAutenticacao.login(email, senha);
+    const res = await ServicoAutenticacao.login(nome, senha);
     if (res.sucesso) {
       setUsuario(res.usuario);
     }
@@ -61,9 +61,9 @@ export function AuthProvider({ children }) {
     return res;
   };
 
-  const registrar = async (nome, email, senha) => {
+  const registrar = async (nome, senha) => {
     setCarregando(true);
-    const res = await ServicoAutenticacao.registrar(nome, email, senha);
+    const res = await ServicoAutenticacao.registrar(nome, senha);
     if (res.sucesso) {
       setUsuario(res.usuario);
     }

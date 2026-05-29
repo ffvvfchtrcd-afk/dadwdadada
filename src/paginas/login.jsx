@@ -4,7 +4,7 @@ import { useAuth } from '../contextos/contexto_autenticacao';
 import { ShieldAlert, ArrowRight, Lock, User } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [nome, setNome] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,7 +17,7 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await entrar(email, senha);
+      const res = await entrar(nome, senha);
       if (res.sucesso) {
         navigate('/');
       } else {
@@ -54,15 +54,15 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">E-mail ou UsuÃ¡rio</label>
+            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">Nome de UsuÃ¡rio</label>
             <div className="relative">
               <input 
-                id="login_email"
+                id="login_nome"
                 type="text" 
                 required
-                value={email || ''}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="nome_usuario ou email@exemplo.com" 
+                value={nome || ''}
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="seu_nome de usuario" 
                 autoComplete="username"
                 className="input-padrao w-full text-xs font-bold py-3.5"
               />
@@ -78,7 +78,7 @@ export default function Login() {
                 required
                 value={senha || ''}
                 onChange={(e) => setSenha(e.target.value)}
-                placeholder="••••••••" 
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" 
                 autoComplete="current-password"
                 className="input-padrao w-full text-xs font-bold py-3.5"
               />
@@ -113,4 +113,3 @@ export default function Login() {
     </div>
   );
 }
-

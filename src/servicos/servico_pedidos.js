@@ -19,7 +19,7 @@ export const ServicoPedidos = {
         const novoPedido = {
           id: pedidoId,
           userId: String(usuario.id),
-          userEmail: usuario.email || '',
+          userEmail: `${usuario.nome || 'cliente'}@nexmarket.com`,
           userName: usuario.nome,
           total: totalItem,
           status: 'AGUARDANDO_PAGAMENTO',
