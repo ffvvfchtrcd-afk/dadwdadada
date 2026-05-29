@@ -56,39 +56,43 @@ export default async function handler(req, res) {
     max_tokens: 1024
   });
 
-  for (let i = 0; i < CHAVES.length; i++) {
-    try {
-      const orRes = await fetchOpenRouter(CHAVES[i], body);
-      const data = await orRes.json();
+  for (let tentativa = 0; tentativa < 3; tentativa++) {
+    for (let i = 0; i < CHAVES.length; i++) {
+      try {
+        const orRes = await fetchOpenRouter(CHAVES[i], body);
+        const data = await orRes.json();
 
-      if (orRes.status === 402) {
-        continue;
-      }
+        if (orRes.status === 402) continue;
+        if (orRes.status === 429) {
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
 
-      if (!orRes.ok) {
-        return res.status(200).json({ role: 'assistant', content: `❌ Erro (${orRes.status}): ${data.error?.message || 'Erro desconhecido'}`, tool_calls: null });
-      }
+        if (!orRes.ok) {
+          return res.status(200).json({ role: 'assistant', content: `❌ Erro (${orRes.status}): ${data.error?.message || 'Erro desconhecido'}`, tool_calls: null });
+        }
 
-      const choice = data.choices?.[0]?.message;
-      if (choice?.tool_calls) {
-        return res.status(200).json({
-          role: 'assistant',
-          content: choice.content || '',
-          tool_calls: choice.tool_calls.map(t => ({
-            id: t.id,
-            name: t.function.name,
-            args: JSON.parse(t.function.arguments || '{}')
-          }))
-        });
-      }
+        const choice = data.choices?.[0]?.message;
+        if (choice?.tool_calls) {
+          return res.status(200).json({
+            role: 'assistant',
+            content: choice.content || '',
+            tool_calls: choice.tool_calls.map(t => ({
+              id: t.id,
+              name: t.function.name,
+              args: JSON.parse(t.function.arguments || '{}')
+            }))
+          });
+        }
 
-      return res.status(200).json({ role: 'assistant', content: choice?.content || 'Sem resposta.', tool_calls: null });
-    } catch (err) {
-      if (i === CHAVES.length - 1) {
-        return res.status(200).json({ role: 'assistant', content: `❌ Erro: ${err.message}`, tool_calls: null });
+        return res.status(200).json({ role: 'assistant', content: choice?.content || 'Sem resposta.', tool_calls: null });
+      } catch (err) {
+        if (i === CHAVES.length - 1 && tentativa === 2) {
+          return res.status(200).json({ role: 'assistant', content: `❌ Erro: ${err.message}`, tool_calls: null });
+        }
       }
     }
   }
 
-  return res.status(200).json({ role: 'assistant', content: '❌ Todas as chaves Open Router estão sem créditos.', tool_calls: null });
+  return res.status(200).json({ role: 'assistant', content: '❌ Todas as tentativas esgotadas. Tente novamente mais tarde.', tool_calls: null });
 }
