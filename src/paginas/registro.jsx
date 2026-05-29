@@ -17,7 +17,7 @@ export default function Registro() {
     setError('');
 
     if (senha !== confirmarSenha) {
-      setError('As senhas digitadas nÃ£o coincidem.');
+      setError('As senhas digitadas não coincidem.');
       return;
     }
 
@@ -47,7 +47,7 @@ export default function Registro() {
             Criar Nova Conta
           </h2>
           <p className="text-xs text-gray-400">
-            Crie seu perfil e tenha acesso Ã  entrega instantÃ¢nea.
+            Crie seu perfil e tenha acesso à entrega instantânea.
           </p>
         </div>
 
@@ -60,7 +60,7 @@ export default function Registro() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">Nome de UsuÃ¡rio</label>
+            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">Nome de Usuário</label>
             <input 
               type="text" 
               required
@@ -115,9 +115,9 @@ export default function Registro() {
 
         <div className="text-center mt-6 pt-4 border-t border-gray-800">
           <p className="text-xs text-gray-400">
-            JÃ¡ possui cadastro?{' '}
+            Já possui cadastro?{' '}
             <Link to="/login" className="text-[#b92cff] hover:underline font-bold">
-              FaÃ§a login
+              Faça login
             </Link>
           </p>
         </div>

@@ -64,7 +64,7 @@ export default function DetalhesProduto() {
   if (!produto) {
     return (
       <div className="text-center py-20">
-        <h3 className="fonte-cartoon text-lg text-white mb-2">Produto nÃ£o encontrado</h3>
+        <h3 className="fonte-cartoon text-lg text-white mb-2">Produto não encontrado</h3>
         <Link to="/" className="botao-neutro text-xs">
           Voltar para a vitrine
         </Link>
@@ -81,11 +81,11 @@ export default function DetalhesProduto() {
       return;
     }
     if (!variacaoSelecionada) {
-      mostrarToast("Selecione uma opÃ§Ã£o antes de adicionar.");
+      mostrarToast("Selecione uma opção antes de adicionar.");
       return;
     }
     if (semEstoque) {
-      mostrarToast("Esta opÃ§Ã£o estÃ¡ esgotada no momento.");
+      mostrarToast("Esta opção está esgotada no momento.");
       return;
     }
     const produtoCarrinho = {
@@ -108,11 +108,11 @@ export default function DetalhesProduto() {
       return;
     }
     if (!variacaoSelecionada) {
-      mostrarToast("Selecione uma opÃ§Ã£o.");
+      mostrarToast("Selecione uma opção.");
       return;
     }
     if (semEstoque) {
-      mostrarToast("Esta opÃ§Ã£o estÃ¡ esgotada no momento.");
+      mostrarToast("Esta opção está esgotada no momento.");
       return;
     }
 
@@ -230,12 +230,12 @@ export default function DetalhesProduto() {
               <span>Garantia de Entrega</span>
             </div>
             <p className="text-gray-400">
-              Todos os nossos produtos digitais possuem autenticaÃ§Ã£o direta e sÃ£o testados. Suporte ativo 24/7.
+              Todos os nossos produtos digitais possuem autenticação direta e são testados. Suporte ativo 24/7.
             </p>
           </div>
         </div>
 
-        {/* InformaÃ§Ãµes de Compra */}
+        {/* Informações de Compra */}
         <div className="md:col-span-7 space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
@@ -250,11 +250,11 @@ export default function DetalhesProduto() {
               {produto.titulo}
             </h1>
             <p className="text-sm text-gray-400">
-              {produto.miniDesc || 'Produto VIP com envio instantÃ¢neo e total garantia de funcionamento.'}
+              {produto.miniDesc || 'Produto VIP com envio instantâneo e total garantia de funcionamento.'}
             </p>
           </div>
 
-          {/* PreÃ§o */}
+          {/* Preço */}
           <div className="flex items-baseline gap-3">
             {precoOriginal > precoAtual && (
               <span className="text-gray-500 line-through text-sm">
@@ -277,17 +277,17 @@ export default function DetalhesProduto() {
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-400 font-semibold uppercase">Estoque:</span>
               <span className={`text-xs font-bold px-2 py-0.5 rounded ${(produto.estoque || 0) > 0 ? "bg-[#00e676]/20 text-[#00e676]" : "bg-red-500/20 text-red-500"}`}>
-                {(produto.estoque || 0) > 0 ? `${produto.estoque} DisponÃ­vel` : "Sem Estoque"}
+                {(produto.estoque || 0) > 0 ? `${produto.estoque} Disponível` : "Sem Estoque"}
               </span>
             </div>
           )}
 
-          {/* Selecionar VariaÃ§Ã£o */}
+          {/* Selecionar Variação */}
           {produto.variacoes && produto.variacoes.length > 0 && (
             <div className="space-y-3">
               <h3 className="fonte-cartoon text-xs text-gray-300 uppercase tracking-wider flex items-center gap-2">
                 <Layers size={14} className="text-[#00f0ff]" />
-                Escolha a OpÃ§Ã£o Desejada
+                Escolha a Opção Desejada
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {produto.variacoes.map((v) => (
@@ -306,7 +306,7 @@ export default function DetalhesProduto() {
                     </div>
                     <span className="font-cartoon text-sm text-[#00f0ff]">{FormatarMoeda(v.preco)}</span>
                     <span className="text-[9px] text-gray-400 block mt-1">
-                      {v.estoque_tipo === 'AUTOMATICA' ? 'ENTREGA AUTOMÃTICA' : 'ENTREGA MANUAL'}
+                      {v.estoque_tipo === 'AUTOMATICA' ? 'ENTREGA AUTOMÁTICA' : 'ENTREGA MANUAL'}
                     </span>
                   </div>
                 ))}
@@ -361,20 +361,20 @@ export default function DetalhesProduto() {
             </div>
           </div>
 
-          {/* Tabs: DescriÃ§Ã£o / AvaliaÃ§Ãµes */}
+          {/* Tabs: Descrição / Avaliações */}
           <div>
             <div className="flex border-b border-gray-800 gap-2 select-none mb-4">
               <button 
                 onClick={() => setAbaAtiva("descricao")}
                 className={`pb-2 px-4 font-bold text-xs border-b-2 transition-colors ${abaAtiva === "descricao" ? "border-[#b92cff] text-[#b92cff]" : "border-transparent text-gray-400 hover:text-white"}`}
               >
-                DescriÃ§Ã£o
+                Descrição
               </button>
               <button 
                 onClick={() => setAbaAtiva("avaliacoes")}
                 className={`pb-2 px-4 font-bold text-xs border-b-2 transition-colors ${abaAtiva === "avaliacoes" ? "border-[#b92cff] text-[#b92cff]" : "border-transparent text-gray-400 hover:text-white"}`}
               >
-                AvaliaÃ§Ãµes ({totalAvaliacoes})
+                Avaliações ({totalAvaliacoes})
               </button>
             </div>
 
@@ -395,7 +395,7 @@ export default function DetalhesProduto() {
                 ) : (
                   <div 
                     className="text-xs text-gray-300 leading-relaxed whitespace-pre-line"
-                    dangerouslySetInnerHTML={{ __html: produto.descricao || 'Nenhuma descriÃ§Ã£o fornecida.' }}
+                    dangerouslySetInnerHTML={{ __html: produto.descricao || 'Nenhuma descrição fornecida.' }}
                   />
                 )}
               </div>
@@ -413,7 +413,7 @@ export default function DetalhesProduto() {
                         />
                       ))}
                     </div>
-                    <span className="text-gray-400 text-xs">{totalAvaliacoes} avaliaÃ§Ãµes</span>
+                    <span className="text-gray-400 text-xs">{totalAvaliacoes} avaliações</span>
                   </div>
 
                   <div className="flex-1 space-y-1 max-w-xs">
@@ -435,7 +435,7 @@ export default function DetalhesProduto() {
 
                 {totalAvaliacoes === 0 ? (
                   <div className="text-center py-6 text-gray-500 border border-dashed border-gray-800 rounded-xl">
-                    <p className="text-sm">Nenhuma avaliaÃ§Ã£o encontrada para este produto.</p>
+                    <p className="text-sm">Nenhuma avaliação encontrada para este produto.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">

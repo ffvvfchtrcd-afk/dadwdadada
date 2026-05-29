@@ -24,7 +24,7 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
     }
   };
 
-  // Calcular mÃ©dia de estrelas
+  // Calcular média de estrelas
   const avaliacoes = produto.avaliacoes || [];
   const totalAvaliacoes = avaliacoes.length;
   const mediaEstrelas = totalAvaliacoes > 0
@@ -42,14 +42,14 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
         className="card-padrao w-full max-w-4xl bg-[#0d091e] border border-zinc-800 text-white p-6 relative max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* BotÃ£o de Fechar */}
+        {/* Botão de Fechar */}
         <div className="absolute top-4 right-4">
           <BotaoFechar onClick={aoFechar} modalId="detalhes" />
         </div>
 
         {/* Breadcrumbs */}
         <div className="text-gray-400 text-xs mb-4 flex items-center gap-1 select-none">
-          <span className="hover:text-white cursor-pointer">InÃ­cio</span>
+          <span className="hover:text-white cursor-pointer">Início</span>
           <span>&gt;</span>
           <span className="hover:text-white cursor-pointer">Produtos</span>
           <span>&gt;</span>
@@ -58,7 +58,7 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
           </span>
         </div>
 
-        {/* Grade de InformaÃ§Ãµes de Cima */}
+        {/* Grade de Informações de Cima */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
           
           {/* Coluna da Imagem (4/12) */}
@@ -71,7 +71,7 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
             </div>
           </div>
 
-          {/* Coluna de AÃ§Ãµes/PreÃ§o (7/12) */}
+          {/* Coluna de Ações/Preço (7/12) */}
           <div className="md:col-span-7 flex flex-col justify-between">
             <div>
               <span className="bg-[#b92cff]/20 text-[#b92cff] border border-[#b92cff]/50 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">
@@ -100,16 +100,16 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
 
               <div className="inline-flex items-center gap-1.5 bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/40 px-2 py-1 rounded text-xs font-bold mb-6">
                 <Zap size={14} className="fill-[#00f0ff]" />
-                ENTREGA AUTOMÃTICA
+                ENTREGA AUTOMÁTICA
               </div>
             </div>
 
             {/* Card de Compra/Estoque */}
             <div className="border border-zinc-800 bg-[#130f2c] rounded-xl p-4 shadow-md">
               <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-400 text-xs font-semibold uppercase">Estoque disponÃ­vel</span>
+                <span className="text-gray-400 text-xs font-semibold uppercase">Estoque disponível</span>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded ${produto.estoque > 0 ? "bg-[#00e676]/20 text-[#00e676]" : "bg-red-500/20 text-red-500"}`}>
-                  {produto.estoque > 0 ? `${produto.estoque} DisponÃ­vel` : "Sem Estoque"}
+                  {produto.estoque > 0 ? `${produto.estoque} Disponível` : "Sem Estoque"}
                 </span>
               </div>
 
@@ -174,7 +174,7 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
 
         </div>
 
-        {/* SeÃ§Ã£o de Tabs (DescriÃ§Ã£o / AvaliaÃ§Ãµes) */}
+        {/* Seção de Tabs (Descrição / Avaliações) */}
         <div className="mt-8">
           <div className="flex border-b border-gray-800 gap-2 select-none mb-4">
             <button 
@@ -182,14 +182,14 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
               onClick={() => setAbaAtiva("descricao")}
               className={`pb-2 px-4 font-bold border-b-2 transition-colors ${abaAtiva === "descricao" ? "border-[#b92cff] text-[#b92cff]" : "border-transparent text-gray-400 hover:text-white"}`}
             >
-              DescriÃ§Ã£o
+              Descrição
             </button>
             <button 
               id="detalhes_aba_avaliacoes"
               onClick={() => setAbaAtiva("avaliacoes")}
               className={`pb-2 px-4 font-bold border-b-2 transition-colors ${abaAtiva === "avaliacoes" ? "border-[#b92cff] text-[#b92cff]" : "border-transparent text-gray-400 hover:text-white"}`}
             >
-              AvaliaÃ§Ãµes do produto ({totalAvaliacoes})
+              Avaliações do produto ({totalAvaliacoes})
             </button>
           </div>
 
@@ -220,7 +220,7 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
                         />
                       ))}
                     </div>
-                    <span className="text-gray-400 text-xs">{totalAvaliacoes} avaliaÃ§Ãµes</span>
+                    <span className="text-gray-400 text-xs">{totalAvaliacoes} avaliações</span>
                   </div>
 
                   <div className="flex-1 space-y-1 max-w-xs">
@@ -242,7 +242,7 @@ export default function ModalDetalhes({ produto, aoFechar, aoComprarAgora, aoAdi
 
                 {totalAvaliacoes === 0 ? (
                   <div className="text-center py-6 text-gray-500 border border-dashed border-gray-800 rounded-xl">
-                    <p className="text-sm">Nenhuma avaliaÃ§Ã£o encontrada para este produto.</p>
+                    <p className="text-sm">Nenhuma avaliação encontrada para este produto.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">

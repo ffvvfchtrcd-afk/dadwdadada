@@ -129,7 +129,7 @@ export default function Cabecalho() {
                   <Link
                     to="/admin"
                     className="text-zinc-500 hover:text-primary p-2 hover:bg-white/[0.05] rounded-xl transition-all duration-300 ease-out-expo flex items-center gap-2"
-                    title="Painel de AdministraÃ§Ã£o"
+                    title="Painel de Administração"
                   >
                     <LayoutDashboard size={18} />
                     <span className="hidden lg:inline text-sm font-medium">Admin</span>
@@ -137,7 +137,7 @@ export default function Cabecalho() {
                   <Link
                     to="/admin/configuracoes"
                     className="text-zinc-500 hover:text-secondary p-2 hover:bg-white/[0.05] rounded-xl transition-all duration-300 ease-out-expo flex items-center gap-2"
-                    title="ConfiguraÃ§Ãµes do Site"
+                    title="Configurações do Site"
                   >
                     <Settings size={18} />
                     <span className="hidden lg:inline text-sm font-medium">Config</span>
@@ -150,7 +150,7 @@ export default function Cabecalho() {
                 <button
                   onClick={toggleNotif}
                   className="text-zinc-500 hover:text-secondary p-2 hover:bg-white/[0.05] rounded-xl transition-all duration-300 ease-out-expo relative"
-                  title="NotificaÃ§Ãµes"
+                  title="Notificações"
                 >
                   {naoLidas > 0 ? <BellRing size={18} className="animate-pulse text-secondary" /> : <Bell size={18} />}
                   {naoLidas > 0 && (
@@ -162,12 +162,12 @@ export default function Cabecalho() {
                 {notifAberto && (
                   <div className="absolute right-0 top-full mt-2 w-80 bg-surface border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl">
                     <div className="p-3 border-b border-white/[0.06] flex items-center justify-between">
-                      <span className="text-sm font-semibold text-white">NotificaÃ§Ãµes</span>
+                      <span className="text-sm font-semibold text-white">Notificações</span>
                       <span className="text-[10px] text-zinc-500">{notificacoes.length} no total</span>
                     </div>
                     <div className="max-h-72 overflow-y-auto">
                       {notificacoes.length === 0 ? (
-                        <p className="text-zinc-500 text-sm text-center py-8">Nenhuma notificaÃ§Ã£o</p>
+                        <p className="text-zinc-500 text-sm text-center py-8">Nenhuma notificação</p>
                       ) : (
                         notificacoes.map((n) => (
                           <div key={n.id} className={`p-3 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors cursor-pointer ${!n.lida ? 'bg-white/[0.02]' : ''}`}>
@@ -191,7 +191,7 @@ export default function Cabecalho() {
                       onClick={() => setNotifAberto(false)}
                       className="block text-center text-xs text-secondary hover:text-white py-2.5 border-t border-white/[0.06] bg-white/[0.02] transition-all duration-300 ease-out-expo"
                     >
-                      Ver todas as notificaÃ§Ãµes
+                      Ver todas as notificações
                     </Link>
                   </div>
                 )}

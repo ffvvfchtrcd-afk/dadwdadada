@@ -57,8 +57,8 @@ export default function MeusPedidos() {
     return (
       <div className="text-center py-20">
         <ShieldAlert className="text-[#ff2a74] mx-auto mb-4" size={48} />
-        <h3 className="fonte-cartoon text-lg text-white mb-2">FaÃ§a Login para Acessar</h3>
-        <p className="text-gray-400 text-xs">VocÃª precisa estar logado para ver seus pedidos anteriores.</p>
+        <h3 className="fonte-cartoon text-lg text-white mb-2">Faça Login para Acessar</h3>
+        <p className="text-gray-400 text-xs">Você precisa estar logado para ver seus pedidos anteriores.</p>
       </div>
     );
   }
@@ -86,7 +86,7 @@ export default function MeusPedidos() {
         <div className="text-center py-20 border-3 border-dashed border-gray-800 rounded-3xl bg-[#0d091e]">
           <Package className="text-gray-600 mx-auto mb-4" size={40} />
           <h3 className="fonte-cartoon text-base text-gray-400 mb-1">Nenhum pedido realizado</h3>
-          <p className="text-gray-500 text-xs">Suas compras digitais aparecerÃ£o catalogadas aqui.</p>
+          <p className="text-gray-500 text-xs">Suas compras digitais aparecerão catalogadas aqui.</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -109,7 +109,7 @@ export default function MeusPedidos() {
                 <div>
                   <h4 className="fonte-cartoon text-sm text-white mb-2">{pedido.productName}</h4>
                   <p className="text-xs text-gray-400 mb-1">
-                    VariaÃ§Ã£o: <strong className="text-gray-200">{pedido.variationName}</strong>
+                    Variação: <strong className="text-gray-200">{pedido.variationName}</strong>
                   </p>
                   <p className="text-xs text-gray-400 mb-1">
                     Quantidade: <strong className="text-gray-200">{pedido.quantity}x</strong>
@@ -165,7 +165,7 @@ export default function MeusPedidos() {
                   ) : (
                     <div className="text-center py-4 text-gray-500">
                       <p className="text-xs">Aguardando processamento ou envio do suporte.</p>
-                      <p className="text-[10px] text-gray-600 mt-1">Nossa equipe estÃ¡ separando seu produto!</p>
+                      <p className="text-[10px] text-gray-600 mt-1">Nossa equipe está separando seu produto!</p>
                     </div>
                   )}
                 </div>
@@ -175,7 +175,7 @@ export default function MeusPedidos() {
         </div>
       )}
 
-      {/* Reutiliza modal do PIX se o usuÃ¡rio clicar para pagar */}
+      {/* Reutiliza modal do PIX se o usuário clicar para pagar */}
       {pixAbertoId && (
         <ModalPix
           pedidoId={pixAbertoId}

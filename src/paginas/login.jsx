@@ -54,7 +54,7 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">Nome de UsuÃ¡rio</label>
+            <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5 ml-1">Nome de Usuário</label>
             <div className="relative">
               <input 
                 id="login_nome"
@@ -103,7 +103,7 @@ export default function Login() {
 
         <div className="text-center mt-6 pt-4 border-t border-gray-800">
           <p className="text-xs text-gray-400">
-            Ainda nÃ£o tem conta?{' '}
+            Ainda não tem conta?{' '}
             <Link to="/registro" className="text-[#00f0ff] hover:underline font-bold">
               Cadastre-se aqui
             </Link>

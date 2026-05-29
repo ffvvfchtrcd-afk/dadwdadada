@@ -31,13 +31,13 @@ export default function ModalCarrinho({
       aoAplicarCupom(cupomInput.trim().toUpperCase());
       setErroCupom("");
     } else {
-      setErroCupom("Cupom invÃ¡lido!");
+      setErroCupom("Cupom inválido!");
     }
   };
 
   const lidarComFinalizar = async () => {
     if (!usuario) {
-      alert("VocÃª precisa fazer login para finalizar a compra.");
+      alert("Você precisa fazer login para finalizar a compra.");
       return;
     }
 
@@ -45,7 +45,7 @@ export default function ModalCarrinho({
     try {
       const res = await ServicoPedidos.criarPedidosDoCarrinho(usuario, carrinho, total);
       if (res.sucesso && res.orders.length > 0) {
-        // Envia o primeiro ID criado para exibiÃ§Ã£o no Pix
+        // Envia o primeiro ID criado para exibição no Pix
         const pedidoCriado = res.orders[0];
         aoFinalizarCompra(pedidoCriado.id, total);
       } else {
@@ -84,12 +84,12 @@ export default function ModalCarrinho({
           {carrinho.length === 0 ? (
             <div className="text-center py-12 flex flex-col items-center gap-4 border-2 border-dashed border-gray-800 rounded-xl mt-6">
               <ShoppingCart size={48} className="text-gray-600 animate-bounce" />
-              <p className="text-gray-400 text-sm">Seu carrinho estÃ¡ vazio.</p>
+              <p className="text-gray-400 text-sm">Seu carrinho está vazio.</p>
               <button 
                 onClick={aoFechar}
                 className="botao-secundario text-xs mt-2"
               >
-                Voltar Ã s compras
+                Voltar às compras
               </button>
             </div>
           ) : (
@@ -114,7 +114,7 @@ export default function ModalCarrinho({
                     </span>
                   </div>
 
-                  {/* AÃ§Ãµes de Quantidade */}
+                  {/* Ações de Quantidade */}
                   <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center border border-black rounded-lg bg-[#0d091e] overflow-hidden">
                       <button 

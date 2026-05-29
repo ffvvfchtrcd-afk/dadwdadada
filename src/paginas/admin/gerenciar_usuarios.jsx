@@ -30,7 +30,7 @@ export default function GerenciarUsuarios() {
       setUsuarios(data || []);
     } catch (err) {
       console.error(err);
-      setErro('Erro ao carregar usuÃ¡rios.');
+      setErro('Erro ao carregar usuários.');
     } finally {
       setCarregando(false);
     }
@@ -74,7 +74,7 @@ export default function GerenciarUsuarios() {
       carregarUsuarios();
     } catch (err) {
       console.error(err);
-      setErro('Erro ao alterar permissÃ£o do usuÃ¡rio.');
+      setErro('Erro ao alterar permissão do usuário.');
     }
   };
 
@@ -124,9 +124,9 @@ export default function GerenciarUsuarios() {
 
       <div className="mb-8">
         <h2 className="fonte-cartoon text-xl text-white uppercase tracking-wider glow-roxo">
-          ðŸ‘¥ Gerenciar UsuÃ¡rios
+          ðŸ‘¥ Gerenciar Usuários
         </h2>
-        <p className="text-xs text-gray-400">Gerencie saldos da carteira, altere cargos ou bloqueie usuÃ¡rios ativos.</p>
+        <p className="text-xs text-gray-400">Gerencie saldos da carteira, altere cargos ou bloqueie usuários ativos.</p>
       </div>
 
       {erro && (
@@ -149,7 +149,7 @@ export default function GerenciarUsuarios() {
                   <th className="py-3 px-4">Saldo</th>
                   <th className="py-3 px-4">Cargo</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">AÃ§Ãµes</th>
+                  <th className="py-3 px-4 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>

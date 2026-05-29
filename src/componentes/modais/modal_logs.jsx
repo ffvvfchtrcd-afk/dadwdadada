@@ -54,10 +54,10 @@ export default function ModalLogs({ aoFechar, produtosList, aoRecarregarEstoque 
         {/* Corpo principal */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1 min-h-0 overflow-y-auto mb-4">
           
-          {/* SeÃ§Ã£o 1: Visualizador de Logs */}
+          {/* Seção 1: Visualizador de Logs */}
           <div className="flex flex-col h-full min-h-[300px]">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-bold text-gray-400 uppercase">HistÃ³rico de Eventos</span>
+              <span className="text-xs font-bold text-gray-400 uppercase">Histórico de Eventos</span>
               <button 
                 onClick={lidarComLimpeza}
                 className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20"
@@ -99,7 +99,7 @@ export default function ModalLogs({ aoFechar, produtosList, aoRecarregarEstoque 
             </div>
           </div>
 
-          {/* SeÃ§Ã£o 2: Visualizador de Estoque */}
+          {/* Seção 2: Visualizador de Estoque */}
           <div className="flex flex-col h-full min-h-[300px]">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-bold text-gray-400 uppercase flex items-center gap-1">
@@ -144,7 +144,7 @@ export default function ModalLogs({ aoFechar, produtosList, aoRecarregarEstoque 
         </div>
 
         <div className="text-center text-[10px] text-gray-500 border-t border-gray-800 pt-3">
-          Estes logs simulam um banco de dados e sÃ£o atualizados dinamicamente Ã  medida que as interaÃ§Ãµes ocorrem.
+          Estes logs simulam um banco de dados e são atualizados dinamicamente à medida que as interações ocorrem.
         </div>
       </div>
     </div>

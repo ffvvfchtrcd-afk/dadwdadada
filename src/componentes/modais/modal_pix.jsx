@@ -64,7 +64,7 @@ export default function ModalPix({
     setStatus("confirmando");
 
     try {
-      // Confirma no banco (aprova pagamento + despacha automÃ¡tica)
+      // Confirma no banco (aprova pagamento + despacha automática)
       const res = await ServicoPagamento.confirmarPagamento(pedidoId);
       if (res.sucesso) {
         // Busca o pedido atualizado para ver o resultado da entrega
@@ -90,7 +90,7 @@ export default function ModalPix({
         });
       } else {
         setStatus("pendente");
-        alert("Erro na simulaÃ§Ã£o do banco.");
+        alert("Erro na simulação do banco.");
       }
     } catch (err) {
       console.error(err);
@@ -122,10 +122,10 @@ export default function ModalPix({
         {status === "pendente" && cobranca && (
           <div className="text-center space-y-5">
             <h2 className="fonte-cartoon text-xl text-[#00f0ff] uppercase glow-azul tracking-wider">
-              Ãrea de Pagamento PIX
+              Área de Pagamento PIX
             </h2>
             <p className="text-xs text-gray-400">
-              ID da TransaÃ§Ã£o: <span className="font-semibold text-white">{pedidoId}</span>
+              ID da Transação: <span className="font-semibold text-white">{pedidoId}</span>
             </p>
 
             {/* QR Code */}
@@ -170,7 +170,7 @@ export default function ModalPix({
               </div>
             </div>
 
-            {/* SimulaÃ§Ã£o */}
+            {/* Simulação */}
             <div className="pt-2">
               <button
                 onClick={lidarComConfirmacao}
@@ -190,7 +190,7 @@ export default function ModalPix({
               Aguardando Banco...
             </h3>
             <p className="text-xs text-gray-400 max-w-xs">
-              Processando a confirmaÃ§Ã£o do pagamento no Supabase. Aguarde alguns instantes.
+              Processando a confirmação do pagamento no Supabase. Aguarde alguns instantes.
             </p>
           </div>
         )}
@@ -243,10 +243,10 @@ export default function ModalPix({
                   <span>Aguardando Envio Manual</span>
                 </div>
                 <p className="text-xs text-gray-300">
-                  Este produto necessita de entrega manual. O administrador da NexMarket foi notificado e enviarÃ¡ suas chaves em breve.
+                  Este produto necessita de entrega manual. O administrador da NexMarket foi notificado e enviará suas chaves em breve.
                 </p>
                 <p className="text-[10px] text-gray-400">
-                  VocÃª pode acompanhar a entrega e resgatar suas chaves acessando a aba <strong>Meus Pedidos</strong> no seu perfil.
+                  Você pode acompanhar a entrega e resgatar suas chaves acessando a aba <strong>Meus Pedidos</strong> no seu perfil.
                 </p>
               </div>
             )}
