@@ -4,91 +4,75 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Reset e variáveis de cores */
 @layer base {
-  :root {
-    --fundo-escuro: #09090b;
-    --fundo-card: #18181b;
-  }
-  
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
-  
+
   body {
-    background-color: var(--fundo-escuro);
-    color: #f4f4f5;
+    background-color: #09090b;
+    color: #e4e4e7;
     font-family: 'Outfit', sans-serif;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  ::selection {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #fff;
+  }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--fundo-escuro);
-}
-::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #09090b; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
 @layer components {
-  /* Base de botões compartilhada */
   .btn-base, .botao-primario, .botao-secundario, .botao-neutro, .botao-sucesso, .botao-perigo {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-darkBg disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium transition-all duration-300 ease-out-expo rounded-xl outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-darkBg disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
   .botao-primario {
-    @apply bg-primary text-white hover:bg-primaryHover focus:ring-primary shadow-sm hover:shadow-lg;
+    @apply bg-primary text-white hover:bg-primaryHover focus:ring-primary/40 shadow-sm hover:shadow-lg hover:shadow-primary/10 border border-white/[0.06];
   }
 
   .botao-secundario {
-    @apply bg-secondary text-white hover:bg-secondaryHover focus:ring-secondary shadow-sm;
+    @apply bg-secondary/10 text-secondary hover:bg-secondary/20 focus:ring-secondary/30 border border-secondary/20 hover:border-secondary/40 shadow-sm;
   }
 
   .botao-neutro {
-    @apply bg-zinc-800 text-zinc-100 border border-zinc-700 hover:bg-zinc-700 focus:ring-zinc-500;
+    @apply bg-white/[0.04] text-zinc-300 border border-white/[0.06] hover:bg-white/[0.08] hover:border-white/[0.12] hover:text-white focus:ring-zinc-500/30;
   }
 
   .botao-sucesso {
-    @apply bg-success text-white hover:bg-emerald-600 focus:ring-success shadow-sm;
+    @apply bg-success/10 text-success hover:bg-success/20 focus:ring-success/30 border border-success/20 hover:border-success/40 shadow-sm;
   }
 
   .botao-perigo {
-    @apply bg-danger text-white hover:bg-rose-600 focus:ring-danger shadow-sm;
+    @apply bg-danger/10 text-danger hover:bg-danger/20 focus:ring-danger/30 border border-danger/20 hover:border-danger/40 shadow-sm;
   }
 
-  /* Inputs padronizados */
   .input-padrao {
-    @apply w-full bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-lg px-4 py-2.5 text-sm outline-none transition-all duration-200 placeholder-zinc-500 focus:border-primary focus:ring-1 focus:ring-primary shadow-inner;
+    @apply w-full bg-white/[0.03] border border-white/[0.07] text-zinc-100 rounded-xl px-4 py-3 text-sm outline-none transition-all duration-300 ease-out-expo placeholder-zinc-500 focus:border-primary/40 focus:ring-2 focus:ring-primary/10;
   }
 
-  /* Cards padronizados */
   .card-padrao {
-    @apply bg-cardBg border border-zinc-800/60 rounded-xl shadow-md transition-all duration-300;
+    @apply bg-cardBg border border-white/[0.05] rounded-2xl shadow-sm transition-all duration-500 ease-out-expo;
   }
   .card-padrao:hover {
-    @apply border-zinc-700/80 shadow-xl shadow-black/40 -translate-y-0.5;
+    @apply border-white/[0.09] shadow-md;
   }
 }
 
 @layer utilities {
-  /* Banner de Texto Rolante */
   .banner-rolante {
     display: flex;
     overflow: hidden;
     user-select: none;
-    background-color: theme('colors.primary');
     padding: 6px 0;
     width: 100%;
   }
@@ -107,15 +91,16 @@
     to { transform: translateX(-100%); }
   }
 
-  /* Estilo para overlays/modais escuros */
   .modal-overlay {
-    background-color: rgba(9, 9, 11, 0.85);
-    backdrop-filter: blur(4px);
+    background-color: rgba(9, 9, 11, 0.8);
+    backdrop-filter: blur(8px);
   }
 
-  /* Efeitos utilitários */
   .glow-primary {
-    text-shadow: 0 0 16px rgba(139, 92, 246, 0.4);
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+  }
+
+  .linha-divisora {
+    @apply h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent;
   }
 }
-

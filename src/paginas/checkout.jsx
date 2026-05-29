@@ -234,7 +234,7 @@ export default function Checkout() {
             <React.Fragment key={e.id}>
               <div className="flex items-center gap-2">
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
-                  ativa ? "bg-primary text-white ring-2 ring-primary/30" :
+                  ativa ? "bg-primary text-white ring-2 ring-primary/20" :
                   concluida ? "bg-emerald-500 text-white" : "bg-zinc-800 text-zinc-500"
                 }`}>
                   {concluida ? <Check size={14} /> : i + 1}

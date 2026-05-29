@@ -100,41 +100,41 @@ export default function Loja() {
     <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 relative">
       
       {/* Barra de Busca */}
-      <div className="mb-8 flex gap-4 max-w-xl mx-auto relative">
+      <div className="mb-8 flex gap-4 max-w-lg mx-auto relative">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-500">
           <Search size={18} />
         </div>
         <input 
           id="loja_busca"
           type="text" 
-          placeholder="O que você está procurando hoje?"
+          placeholder="Buscar produtos..."
           value={termoBusca || ''}
           onChange={(e) => setTermoBusca(e.target.value)}
-          className="input-padrao pl-11 py-3 text-base shadow-sm"
+          className="input-padrao pl-11 py-3 text-sm"
         />
       </div>
 
       {/* Banner Principal */}
-      <div className="relative bg-gradient-to-r from-zinc-900 to-zinc-800 border border-zinc-800 rounded-2xl p-6 md:p-8 mb-10 shadow-lg overflow-hidden select-none">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute left-0 bottom-0 w-48 h-48 bg-secondary/10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
+      <div className="relative bg-gradient-to-br from-surface via-cardBg to-surface border border-white/[0.05] rounded-2xl p-6 md:p-8 mb-10 shadow-sm overflow-hidden select-none">
+        <div className="absolute right-0 top-0 w-64 h-64 bg-primary/[0.03] rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute left-0 bottom-0 w-48 h-48 bg-secondary/[0.03] rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
         
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="max-w-2xl">
-            <span className="bg-primary/20 text-primary border border-primary/30 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
+            <span className="text-primary/60 text-[10px] font-semibold uppercase tracking-[0.15em]">
               MERCADO PREMIUM
             </span>
-            <h2 className="text-2xl md:text-3xl font-bold mt-4 text-white tracking-tight">
+            <h2 className="text-xl md:text-2xl font-bold mt-2 text-white/90 tracking-tight">
               Bem vindo à <span className="text-primary">NexMarket</span>
             </h2>
-            <p className="text-zinc-400 text-sm md:text-base mt-2">
-              Chaves de jogos, contas, robux e fornecedores exclusivos a preço de atacado. Compre com segurança e entrega imediata!
+            <p className="text-zinc-500 text-xs md:text-sm mt-2 leading-relaxed max-w-xl">
+              Chaves de jogos, contas e fornecedores exclusivos a preço de atacado. Entrega imediata.
             </p>
           </div>
           {usuario && (
-            <div className="flex items-center gap-2.5 bg-zinc-950/50 backdrop-blur-sm border border-zinc-800/80 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-300">
-              <span className="w-2 h-2 rounded-full bg-success shadow-[0_0_8px_theme('colors.success')]"></span>
-              <span>Logado como: <strong className="text-white font-semibold">{usuario.nome}</strong></span>
+            <div className="flex items-center gap-2.5 bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] px-4 py-2 rounded-xl text-xs font-medium text-zinc-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-success"></span>
+              <span><strong className="text-zinc-200 font-semibold">{usuario.nome}</strong></span>
             </div>
           )}
         </div>
@@ -142,15 +142,15 @@ export default function Loja() {
 
       {/* Abas de Categoria */}
       {!carregando && produtos.length > 0 && (
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide justify-center md:justify-start">
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide justify-center md:justify-start">
           {categoriasDisponiveis.map(cat => (
             <button
               key={cat}
               onClick={() => setCategoriaAtiva(cat)}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-medium transition-all duration-300 ease-out-expo whitespace-nowrap ${
                 categoriaAtiva === cat 
-                  ? 'bg-primary text-white shadow-[0_0_15px_theme("colors.primary.DEFAULT")] opacity-100' 
-                  : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:text-white hover:bg-zinc-800'
+                  ? 'bg-primary/10 text-primary border border-primary/20' 
+                  : 'bg-white/[0.03] text-zinc-500 border border-white/[0.06] hover:text-zinc-300 hover:bg-white/[0.06]'
               }`}
             >
               {cat}

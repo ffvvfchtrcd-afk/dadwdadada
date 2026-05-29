@@ -29,7 +29,7 @@ const CardProduto = React.memo(function CardProduto({ produto, aoClicar, aoCompr
           <ImagemProduto produtoId={produto.id} />
         )}
         
-        <div className="absolute top-2 left-2 flex gap-1.5 items-center bg-zinc-900/90 backdrop-blur-sm border border-zinc-700/50 px-2 py-1 rounded-md text-[10px] font-bold uppercase shadow-sm">
+        <div className="absolute top-2 left-2 flex gap-1.5 items-center bg-black/60 backdrop-blur-sm border border-white/[0.08] px-2 py-1 rounded-lg text-[10px] font-semibold uppercase shadow-sm">
           {isManual ? (
             <><Package size={12} className="text-amber-400" /><span className="text-amber-400">ENTREGA MANUAL</span></>
           ) : (
@@ -107,7 +107,7 @@ const CardProduto = React.memo(function CardProduto({ produto, aoClicar, aoCompr
                 e.stopPropagation();
                 if (!semEstoque) aoAdicionarAoCarrinho(produto, 1);
               }}
-              className={`p-2.5 px-3 flex items-center justify-center ${semEstoque ? 'botao-neutro opacity-30 cursor-not-allowed' : 'botao-neutro hover:text-white hover:border-zinc-500'}`}
+              className={`p-2.5 px-3 flex items-center justify-center ${semEstoque ? 'botao-neutro opacity-30 cursor-not-allowed' : 'botao-neutro'}`}
               title={semEstoque ? "Produto esgotado" : "Adicionar ao carrinho"}
             >
               <ShoppingBag size={18} />

@@ -12,8 +12,8 @@ export default function MenuInferior() {
   const isAtivo = (caminho) => location.pathname === caminho;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 w-full bg-darkBg/95 backdrop-blur-md border-t border-zinc-800 z-50 pb-safe">
-      <div className="flex justify-around items-center h-16 px-2">
+    <div className="md:hidden fixed bottom-0 left-0 w-full bg-darkBg/90 backdrop-blur-xl border-t border-white/[0.05] z-50 pb-safe">
+      <div className="flex justify-around items-center h-14 px-2">
         
         {/* Home */}
         <Link 
