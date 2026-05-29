@@ -25,17 +25,17 @@ const FERRAMENTAS = [
     type: 'function',
     function: {
       name: 'criar_produto',
-      description: 'Cria um novo produto na loja',
+      description: 'Cria um novo produto na loja. Se não especificar categoria, usa a primeira disponível.',
       parameters: {
         type: 'object',
         properties: {
           nome: { type: 'string', description: 'Nome do produto' },
           descricao: { type: 'string', description: 'Descrição detalhada' },
-          categoriaId: { type: 'number', description: 'ID da categoria' },
           miniDesc: { type: 'string', description: 'Descrição curta' },
-          bannerUrl: { type: 'string', description: 'URL da imagem' }
+          bannerUrl: { type: 'string', description: 'URL da imagem' },
+          categoria: { type: 'string', description: 'ID da categoria como string (opcional - usa padrão se vazio)' }
         },
-        required: ['nome', 'categoriaId']
+        required: ['nome']
       }
     }
   },
@@ -52,6 +52,7 @@ const FERRAMENTAS = [
           descricao: { type: 'string' },
           miniDesc: { type: 'string' },
           bannerUrl: { type: 'string' },
+          categoria: { type: 'string', description: 'ID da categoria como string' },
           status: { type: 'string', enum: ['ATIVO', 'INATIVO'] }
         },
         required: ['id']
@@ -102,11 +103,12 @@ const FERRAMENTAS = [
     type: 'function',
     function: {
       name: 'listar_pedidos',
-      description: 'Lista os pedidos recentes',
+      description: 'Lista os pedidos recentes. Filtra por status se informado (ex: PENDENTE, AGUARDANDO_PAGAMENTO, ENTREGUE).',
       parameters: {
         type: 'object',
         properties: {
-          limite: { type: 'number', description: 'Máx de pedidos (padrão 10)' }
+          limite: { type: 'number', description: 'Máx de pedidos (padrão 10)' },
+          status: { type: 'string', description: 'Filtrar por status do pedido' }
         }
       }
     }
@@ -144,10 +146,15 @@ async function executar(nome, args) {
       }
       case 'criar_produto': {
         const id = Date.now();
+        let categoria = args.categoria;
+        if (!categoria) {
+          const { data: cats } = await supabase.from('categories').select('id').limit(1);
+          categoria = cats?.[0]?.id ? String(cats[0].id) : '1';
+        }
         const { error } = await supabase.from('products').insert([{
           id, nome: args.nome, descricao: args.descricao || '',
           miniDesc: args.miniDesc || '', bannerUrl: args.bannerUrl || '',
-          categoria: String(args.categoriaId), status: 'ATIVO',
+          categoria, status: 'ATIVO',
           dataCriacao: new Date().toISOString(),
           dataAtualizacao: new Date().toISOString()
         }]);
@@ -160,6 +167,7 @@ async function executar(nome, args) {
         if (args.descricao) updates.descricao = args.descricao;
         if (args.miniDesc) updates.miniDesc = args.miniDesc;
         if (args.bannerUrl) updates.bannerUrl = args.bannerUrl;
+        if (args.categoria) updates.categoria = args.categoria;
         if (args.status) updates.status = args.status;
         updates.dataAtualizacao = new Date().toISOString();
         const { error } = await supabase.from('products').update(updates).eq('id', args.id);

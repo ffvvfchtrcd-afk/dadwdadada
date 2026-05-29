@@ -91,6 +91,10 @@ export default function ChatIA() {
         setMensagens(prev => [...prev, { role: 'assistant', content: `❌ ${data.error}` }]);
         return;
       }
+      if (!data.content && !data.tool_calls?.length) {
+        setMensagens(prev => [...prev, { role: 'assistant', content: 'Sem resposta do assistente.' }]);
+        return;
+      }
 
       if (data.tool_calls?.length > 0) {
         let log = data.content || '';
