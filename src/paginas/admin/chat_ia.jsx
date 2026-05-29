@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contextos/contexto_autenticacao';
 import { supabase } from '../../configuracoes/supabase';
 import { FerramentasIA } from '../../servicos/ferramentas_ia';
+import { cacheConsulta } from '../../servicos/cache';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Bot, Sparkles, Loader, Copy, Check, Lightbulb, FileText, TrendingUp, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Send, Bot, Sparkles, Loader, Copy, Lightbulb, FileText, TrendingUp, MessageCircle, Trash2 } from 'lucide-react';
 
 const SUGESTOES = [
   { icone: Lightbulb, label: 'Dicas de vendas', texto: 'Me dê 3 dicas práticas para aumentar as vendas da loja hoje' },
@@ -22,6 +23,7 @@ export default function ChatIA() {
   const [enviando, setEnviando] = useState(false);
   const enviandoRef = useRef(false);
   const [contexto, setContexto] = useState(null);
+  const [profundidadeAtual, setProfundidadeAtual] = useState(0);
   const fimRef = useRef(null);
 
   useEffect(() => {
@@ -29,22 +31,33 @@ export default function ChatIA() {
     carregarContexto();
   }, [eAdmin]);
 
+  const limparChat = () => {
+    setMensagens([
+      { role: 'assistant', content: 'Olá! Sou o assistente IA da NEXMARKET. **Posso criar, editar, deletar produtos, gerenciar variações, ver pedidos e estatísticas.** O que você precisa?' }
+    ]);
+    cacheConsulta.limpar('contexto_produtos');
+    setProfundidadeAtual(0);
+  };
+
   useEffect(() => {
     fimRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [mensagens]);
 
   const carregarContexto = async () => {
     try {
-      const [products, categorias] = await Promise.all([
-        supabase.from('products').select('id, nome, status'),
-        supabase.from('categories').select('id, nome').order('id')
-      ]);
+      const dados = await cacheConsulta.obter('contexto_produtos', async () => {
+        const [products, categorias] = await Promise.all([
+          supabase.from('products').select('id, nome, status').limit(200),
+          supabase.from('categories').select('id, nome').order('id')
+        ]);
+        return { products: products.data || [], categorias: categorias.data || [] };
+      }, 60000);
 
       setContexto({
         nomeLoja: 'NEXMARKET',
-        catalogo: products.data || [],
-        categorias: categorias.data || [],
-        produtosCount: (products.data || []).length,
+        catalogo: dados.products,
+        categorias: dados.categorias,
+        produtosCount: dados.products.length,
       });
     } catch {}
   };
@@ -55,10 +68,10 @@ export default function ChatIA() {
     setInput('');
     enviandoRef.current = true;
 
-    const historico = mensagens.slice(1).map(m => ({
+    const historico = mensagens.slice(1, -1).map(m => ({
       role: m.role,
-      content: m.content
-    }));
+      content: typeof m.content === 'string' ? m.content.slice(0, 2000) : ''
+    })).slice(-16);
 
     setMensagens(prev => [...prev, { role: 'user', content: msg }]);
     setEnviando(true);
@@ -78,6 +91,7 @@ export default function ChatIA() {
       setEnviando(false);
       return;
     }
+    setProfundidadeAtual(profundidade);
     try {
       const res = await fetch('/api/chat-ia', {
         method: 'POST',
@@ -140,15 +154,20 @@ export default function ChatIA() {
         <Link to="/admin" className="text-zinc-400 hover:text-white p-2 hover:bg-zinc-800/50 rounded-lg transition-colors">
           <ArrowLeft size={20} />
         </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-            <Bot size={16} className="text-white" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+              <Bot size={16} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-white">Assistente IA</h1>
+              <p className="text-[10px] text-zinc-500">Open Router — ferramentas ativas</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-base font-bold text-white">Assistente IA</h1>
-            <p className="text-[10px] text-zinc-500">Open Router — ferramentas ativas</p>
-          </div>
-        </div>
+          {mensagens.length > 2 && (
+            <button onClick={limparChat} className="ml-auto text-zinc-500 hover:text-red-400 p-2 hover:bg-zinc-800/50 rounded-lg transition-colors" title="Limpar conversa">
+              <Trash2 size={16} />
+            </button>
+          )}
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-3 pr-1 mb-4 scroll-smooth">
@@ -186,7 +205,7 @@ export default function ChatIA() {
             </div>
             <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 flex items-center gap-2">
               <Loader size={16} className="animate-spin text-zinc-500" />
-              <span className="text-xs text-zinc-500">Processando...</span>
+              <span className="text-xs text-zinc-500">{profundidadeAtual > 0 ? `Ação ${profundidadeAtual}/${MAX_PROFUNDIDADE}...` : 'Processando...'}</span>
             </div>
           </div>
         )}
