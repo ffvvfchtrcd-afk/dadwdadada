@@ -5,8 +5,9 @@ const FERRAMENTAS = [
   { type: 'function', function: { name: 'deletar_produto', description: 'Remove um produto e suas variações', parameters: { type: 'object', properties: { id: { type: 'number' } }, required: ['id'] } } },
   { type: 'function', function: { name: 'adicionar_variacao', description: 'Adiciona variação a um produto', parameters: { type: 'object', properties: { produtoId: { type: 'number' }, nome: { type: 'string' }, preco: { type: 'number' }, estoque_tipo: { type: 'string', enum: ['AUTOMATICA', 'MANUAL'] } }, required: ['produtoId', 'nome', 'preco', 'estoque_tipo'] } } },
   { type: 'function', function: { name: 'listar_categorias', description: 'Lista categorias', parameters: { type: 'object', properties: {} } } },
-  { type: 'function', function: { name: 'listar_pedidos', description: 'Lista pedidos recentes', parameters: { type: 'object', properties: { limite: { type: 'number' } } } } },
-  { type: 'function', function: { name: 'estatisticas_loja', description: 'Estatísticas completas da loja', parameters: { type: 'object', properties: {} } } }
+  { type: 'function', function: { name: 'listar_pedidos', description: 'Lista pedidos recentes (status, email, id)', parameters: { type: 'object', properties: { limite: { type: 'number' }, status: { type: 'string' } } } } },
+  { type: 'function', function: { name: 'estatisticas_loja', description: 'Estatísticas completas da loja', parameters: { type: 'object', properties: {} } } },
+  { type: 'function', function: { name: 'entregar_pedido', description: 'Marca um pedido como ENTREGUE. SÓ use após o admin informar o conteúdo a ser entregue.', parameters: { type: 'object', properties: { pedidoId: { type: 'string' }, conteudo: { type: 'string', description: 'Conteúdo da entrega (chaves, links, acessos, etc). Obrigatório.' } }, required: ['pedidoId', 'conteudo'] } } }
 ];
 
 const CHAVES = (process.env.OPEN_ROUTER_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
@@ -47,7 +48,12 @@ export default async function handler(req, res) {
   const body = JSON.stringify({
     model: MODELO,
     messages: [
-      { role: 'system', content: 'Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro. Você tem ferramentas para gerenciar produtos, pedidos e estatísticas. Use-as quando necessário.' },
+      { role: 'system', content: `Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro.
+
+REGRAS DE ENTREGA DE PEDIDOS (ferramenta entregar_pedido):
+- NUNCA execute entregar_pedido sem antes perguntar: qual pedido (ID ou email do cliente) e qual o conteúdo/conteudo da entrega (chaves, links, informações, acessos).
+- Só execute após o admin confirmar ambos os dados.
+- O conteúdo é obrigatório — o pedido precisa ter o que foi comprado entregue ao cliente.` },
       ...(historico || []),
       { role: 'user', content: message }
     ],

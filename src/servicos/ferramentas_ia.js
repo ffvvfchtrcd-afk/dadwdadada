@@ -195,14 +195,51 @@ async function executar(nome, args) {
         return { sucesso: true, dados: data || [] };
       }
       case 'listar_pedidos': {
-        const { data, error } = await supabase.from('compras').select('*').limit(args?.limite || 50);
-        if (error) return { sucesso: false, erro: msgAmigavel(error.message) };
-        const ordenados = (data || []).sort((a, b) => {
+        const { data, error } = await supabase.from('compras').select('*').limit(100);
+        if (error) return { sucesso: false, erro: error.message };
+        let filtrados = data || [];
+        if (args?.status) {
+          filtrados = filtrados.filter(p => p.status === args.status);
+        }
+        const ordenados = filtrados.sort((a, b) => {
           const da = a.dateCreated || a.DateCreated || 0;
           const db = b.dateCreated || b.DateCreated || 0;
           return new Date(db) - new Date(da);
         });
-        return { sucesso: true, dados: ordenados.slice(0, args?.limite || 10) };
+        return { sucesso: true, dados: ordenados.slice(0, args?.limite || 50) };
+      }
+      case 'entregar_pedido': {
+        const { data: pedido, error: buscaErr } = await supabase
+          .from('compras')
+          .select('*')
+          .eq('id', args.pedidoId)
+          .maybeSingle();
+        if (buscaErr) return { sucesso: false, erro: buscaErr.message };
+        if (!pedido) return { sucesso: false, erro: 'Pedido não encontrado.' };
+
+        const conteudo =
+          typeof args.conteudo === 'string'
+            ? args.conteudo.split('\n').filter(Boolean)
+            : Array.isArray(args.conteudo)
+              ? args.conteudo
+              : ['Conteúdo não especificado'];
+
+        const timeline = [
+          ...(pedido.timeline || []),
+          { status: 'ENTREGUE', label: 'Entregue pelo Assistente IA', date: new Date().toISOString() }
+        ];
+
+        const { error: updateErr } = await supabase
+          .from('compras')
+          .update({
+            status: 'ENTREGUE',
+            dateDelivered: new Date().toISOString(),
+            timeline,
+            deliveryContent: conteudo
+          })
+          .eq('id', args.pedidoId);
+        if (updateErr) return { sucesso: false, erro: updateErr.message };
+        return { sucesso: true, dados: { id: args.pedidoId, status: 'ENTREGUE', itensEntregues: conteudo } };
       }
       case 'estatisticas_loja': {
         const [compras, products, users] = await Promise.all([
