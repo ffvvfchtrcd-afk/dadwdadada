@@ -125,15 +125,6 @@ export default function ChatIA() {
           ], profundidade + 1);
         }
       } else {
-            log += `\n\n[Ferramenta: ${tool.name}] Erro: ${resumo}`;
-          }
-        }
-
-        await processarMensagem(msg, [
-          ...historico,
-          { role: 'assistant', content: log }
-        ], profundidade + 1);
-      } else {
         setMensagens(prev => [...prev, { role: 'assistant', content: data.content || 'Pronto!' }]);
       }
     } catch (err) {
