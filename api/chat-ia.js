@@ -9,22 +9,27 @@ const FERRAMENTAS = [
   { type: 'function', function: { name: 'estatisticas_loja', description: 'Estatísticas completas da loja', parameters: { type: 'object', properties: {} } } }
 ];
 
-async function fetchComRetry(url, options, tentativas = 2) {
-  for (let i = 0; i < tentativas; i++) {
-    try {
-      const res = await fetch(url, options);
-      if (res.ok || res.status < 500) return res;
-      if (i < tentativas - 1) {
-        console.warn(`[fetchComRetry] tentativa ${i + 1} falhou (${res.status}), retentando...`);
-        await new Promise(r => setTimeout(r, 1000));
-      }
-    } catch (err) {
-      if (i >= tentativas - 1) throw err;
-      console.warn(`[fetchComRetry] tentativa ${i + 1} excecao: ${err.message}, retentando...`);
-      await new Promise(r => setTimeout(r, 1000));
-    }
+const CHAVES = (process.env.OPEN_ROUTER_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
+const MODELO = process.env.OPEN_ROUTER_MODEL || 'nvidia/nemotron-3-super-120b-a12b:free';
+
+async function fetchOpenRouter(chave, body) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${chave}`,
+        'HTTP-Referer': 'https://nexmarket.vercel.app'
+      },
+      body,
+      signal: controller.signal
+    });
+    return res;
+  } finally {
+    clearTimeout(timeout);
   }
-  return fetch(url, options);
 }
 
 export default async function handler(req, res) {
@@ -32,70 +37,58 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const apiKey = process.env.OPEN_ROUTER_API_KEY;
-  if (!apiKey) {
-    return res.status(200).json({ role: 'assistant', content: '⚠️ Open Router não configurado.', tool_calls: null });
+  if (CHAVES.length === 0) {
+    return res.status(200).json({ role: 'assistant', content: '⚠️ Open Router não configurado. Adicione OPEN_ROUTER_API_KEY nas env vars.', tool_calls: null });
   }
 
   const { message, historico } = req.body;
   if (!message) return res.status(200).json({ error: 'Mensagem é obrigatória' });
 
-  try {
-    const body = JSON.stringify({
-      model: 'openai/gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro.' },
-        ...(historico || []),
-        { role: 'user', content: message }
-      ],
-      tools: FERRAMENTAS,
-      tool_choice: 'auto',
-      max_tokens: 1024
-    });
+  const body = JSON.stringify({
+    model: MODELO,
+    messages: [
+      { role: 'system', content: 'Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro. Você tem ferramentas para gerenciar produtos, pedidos e estatísticas. Use-as quando necessário.' },
+      ...(historico || []),
+      { role: 'user', content: message }
+    ],
+    tools: FERRAMENTAS,
+    tool_choice: 'auto',
+    max_tokens: 1024
+  });
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 25000);
-    const orRes = await fetchComRetry('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://nexmarket.vercel.app'
-      },
-      body,
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
+  for (let i = 0; i < CHAVES.length; i++) {
+    try {
+      const orRes = await fetchOpenRouter(CHAVES[i], body);
+      const data = await orRes.json();
 
-    const data = await orRes.json();
+      if (orRes.status === 402) {
+        continue;
+      }
 
-    if (!orRes.ok) {
-      return res.status(200).json({
-        role: 'assistant',
-        content: `❌ Erro OpenRouter (${orRes.status}): ${data.error?.message || JSON.stringify(data).slice(0, 300)}`,
-        tool_calls: null
-      });
+      if (!orRes.ok) {
+        return res.status(200).json({ role: 'assistant', content: `❌ Erro (${orRes.status}): ${data.error?.message || 'Erro desconhecido'}`, tool_calls: null });
+      }
+
+      const choice = data.choices?.[0]?.message;
+      if (choice?.tool_calls) {
+        return res.status(200).json({
+          role: 'assistant',
+          content: choice.content || '',
+          tool_calls: choice.tool_calls.map(t => ({
+            id: t.id,
+            name: t.function.name,
+            args: JSON.parse(t.function.arguments || '{}')
+          }))
+        });
+      }
+
+      return res.status(200).json({ role: 'assistant', content: choice?.content || 'Sem resposta.', tool_calls: null });
+    } catch (err) {
+      if (i === CHAVES.length - 1) {
+        return res.status(200).json({ role: 'assistant', content: `❌ Erro: ${err.message}`, tool_calls: null });
+      }
     }
-
-    const choice = data.choices?.[0]?.message;
-    if (choice?.tool_calls) {
-      return res.status(200).json({
-        role: 'assistant',
-        content: choice.content || '',
-        tool_calls: choice.tool_calls.map(t => ({
-          id: t.id,
-          name: t.function.name,
-          args: JSON.parse(t.function.arguments || '{}')
-        }))
-      });
-    }
-
-    return res.status(200).json({ role: 'assistant', content: choice?.content || 'Sem resposta.', tool_calls: null });
-  } catch (err) {
-    return res.status(200).json({
-      role: 'assistant',
-      content: `❌ Erro interno: ${err.message} (${err.name})`,
-      tool_calls: null
-    });
   }
+
+  return res.status(200).json({ role: 'assistant', content: '❌ Todas as chaves Open Router estão sem créditos.', tool_calls: null });
 }
