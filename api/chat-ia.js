@@ -10,7 +10,7 @@ const FERRAMENTAS = [
 ];
 
 const CHAVES = (process.env.OPEN_ROUTER_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
-const MODELO = process.env.OPEN_ROUTER_MODEL || 'nvidia/nemotron-3-super-120b-a12b:free';
+const MODELO = process.env.OPEN_ROUTER_MODEL || 'openrouter/free';
 
 async function fetchOpenRouter(chave, body) {
   const controller = new AbortController();
