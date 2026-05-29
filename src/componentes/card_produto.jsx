@@ -4,7 +4,7 @@ import BotaoComprar from "./botoes/botao_comprar";
 import { FormatarMoeda } from "../utilitarios/formatadores";
 import { Zap, ShoppingBag, AlertTriangle, Package } from "lucide-react";
 
-export default function CardProduto({ produto, aoClicar, aoComprarImediato, aoAdicionarAoCarrinho }) {
+const CardProduto = React.memo(function CardProduto({ produto, aoClicar, aoComprarImediato, aoAdicionarAoCarrinho }) {
   const isManual = produto.estoque_tipo && produto.estoque_tipo !== 'AUTOMATICA' && produto.estoque_tipo !== 'AGENTE';
   const semEstoque = !isManual && (produto.estoque || 0) <= 0;
 
@@ -117,7 +117,8 @@ export default function CardProduto({ produto, aoClicar, aoComprarImediato, aoAd
         </div>
 
       </div>
-
     </div>
   );
-}
+});
+
+export default CardProduto;

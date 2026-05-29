@@ -22,25 +22,18 @@ export const ServicoProdutos = {
   // Busca todos os produtos ativos junto com suas variações
   async listarProdutos() {
     try {
-      const { data: products, error: pErr } = await supabase
-        .from('products')
-        .select('*')
-        .eq('status', 'ATIVO');
+      const [pRes, vRes, cRes] = await Promise.all([
+        supabase.from('products').select('*').eq('status', 'ATIVO'),
+        supabase.from('variacoes').select('*').eq('status', 'ATIVO'),
+        supabase.from('categories').select('*').eq('status', 'ATIVO')
+      ]);
 
-      if (pErr) throw pErr;
+      if (pRes.error) throw pRes.error;
+      if (vRes.error) throw vRes.error;
 
-      const { data: variations, error: vErr } = await supabase
-        .from('variacoes')
-        .select('*')
-        .eq('status', 'ATIVO');
-
-      if (vErr) throw vErr;
-
-      // Buscar categorias para mapear ID -> Nome
-      const { data: categorias } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('status', 'ATIVO');
+      const products = pRes.data || [];
+      const variations = vRes.data || [];
+      const categorias = cRes.data || [];
 
       const catMap = {};
       (categorias || []).forEach(c => catMap[c.id] = c.nome);

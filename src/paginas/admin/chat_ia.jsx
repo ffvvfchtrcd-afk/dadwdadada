@@ -3,8 +3,7 @@ import { useAuth } from '../../contextos/contexto_autenticacao';
 import { supabase } from '../../configuracoes/supabase';
 import { FerramentasIA } from '../../servicos/ferramentas_ia';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Bot, Sparkles, Loader, Copy, Check, Lightbulb, FileText, TrendingUp, MessageCircle, AlertTriangle } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { ArrowLeft, Send, Bot, Sparkles, Loader, Copy, Check, Lightbulb, FileText, TrendingUp, MessageCircle } from 'lucide-react';
 
 const SUGESTOES = [
   { icone: Lightbulb, label: 'Dicas de vendas', texto: 'Me dê 3 dicas práticas para aumentar as vendas da loja hoje' },
@@ -102,32 +101,27 @@ export default function ChatIA() {
         for (const tool of data.tool_calls) {
           if (!tool.name || !tool.args) continue;
           const result = await FerramentasIA.executar(tool.name, tool.args);
-          const resumo = result.sucesso
-            ? JSON.stringify(result.dados || { sucesso: true }).slice(0, 1000)
-            : `Erro: ${result.erro}`;
 
           if (result.sucesso) {
             algumSucesso = true;
             if (profundidade === 0) {
               const acoesComFestas = ['deletar_produto', 'criar_produto', 'editar_produto', 'adicionar_variacao'];
               if (acoesComFestas.includes(tool.name)) {
-                confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 }, colors: ['#00e676', '#b92cff'] });
+                import('canvas-confetti').then(m => m.default({ particleCount: 80, spread: 60, origin: { y: 0.5 }, colors: ['#00e676', '#b92cff'] }));
               }
             }
-            log += `\n\n[Ferramenta: ${tool.name}] OK`;
+            log += `\n\n🔧 ${tool.name}(${JSON.stringify(tool.args)}) → OK ${JSON.stringify(result.dados || {})}`;
           } else {
-            log += `\n\n[Ferramenta: ${tool.name}] Erro: ${resumo}`;
+            log += `\n\n🔧 ${tool.name}(${JSON.stringify(tool.args)}) → FALHOU: ${result.erro}`;
           }
         }
 
         if (!algumSucesso) {
           setMensagens(prev => [...prev, { role: 'assistant', content: data.content || 'Não foi possível executar esta ação.' }]);
-        } else {
-          await processarMensagem(msg, [
-            ...historico,
-            { role: 'assistant', content: log }
-          ], profundidade + 1);
+          return;
         }
+        await processarMensagem(msg, [...historico, { role: 'assistant', content: log }], profundidade + 1);
+        return;
       } else {
         setMensagens(prev => [...prev, { role: 'assistant', content: data.content || 'Pronto!' }]);
       }

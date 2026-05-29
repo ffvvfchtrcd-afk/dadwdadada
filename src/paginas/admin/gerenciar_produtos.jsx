@@ -42,14 +42,15 @@ export default function GerenciarProdutos() {
   const carregarDados = async () => {
     try {
       setCarregando(true);
-      const { data: pData } = await supabase.from('products').select('*');
-      const { data: cData } = await supabase.from('categories').select('*').order('hierarquia', { ascending: true });
-      const { data: vData } = await supabase.from('variacoes').select('*');
-      setProdutos(pData || []);
-      setCategorias(cData || []);
-      setTodasVariacoes(vData || []);
+      const [pRes, cRes, vRes] = await Promise.all([
+        supabase.from('products').select('*'),
+        supabase.from('categories').select('*').order('hierarquia', { ascending: true }),
+        supabase.from('variacoes').select('*')
+      ]);
+      setProdutos(pRes.data || []);
+      setCategorias(cRes.data || []);
+      setTodasVariacoes(vRes.data || []);
     } catch (err) {
-      console.error(err);
       setErro('Erro ao carregar os produtos.');
     } finally {
       setCarregando(false);

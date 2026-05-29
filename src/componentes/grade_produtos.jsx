@@ -1,7 +1,7 @@
 import React from "react";
 import CardProduto from "./card_produto";
 
-export default function GradeProdutos({ produtos, aoSelecionarProduto, aoComprarImediato, aoAdicionarAoCarrinho }) {
+const GradeProdutos = React.memo(function GradeProdutos({ produtos, aoSelecionarProduto, aoComprarImediato, aoAdicionarAoCarrinho }) {
   return (
     <div 
       id="grade_produtos"
@@ -18,4 +18,6 @@ export default function GradeProdutos({ produtos, aoSelecionarProduto, aoComprar
       ))}
     </div>
   );
-}
+});
+
+export default GradeProdutos;

@@ -20,6 +20,7 @@ export default function Cabecalho() {
 
   useEffect(() => {
     if (!usuario) { setNotificacoes([]); setNaoLidas(0); return; }
+    let intervalo;
     const carregar = async () => {
       const [lista, count] = await Promise.all([
         ServicoNotificacoes.listar(usuario.id),
@@ -28,9 +29,15 @@ export default function Cabecalho() {
       setNotificacoes(lista);
       setNaoLidas(count);
     };
-    carregar();
-    const intervalo = setInterval(carregar, 15000);
-    return () => clearInterval(intervalo);
+    const iniciar = () => {
+      carregar();
+      intervalo = setInterval(carregar, 15000);
+    };
+    const parar = () => { clearInterval(intervalo); };
+    const onVisibilidade = () => { document.hidden ? parar() : iniciar(); };
+    iniciar();
+    document.addEventListener('visibilitychange', onVisibilidade);
+    return () => { parar(); document.removeEventListener('visibilitychange', onVisibilidade); };
   }, [usuario]);
 
   useEffect(() => {

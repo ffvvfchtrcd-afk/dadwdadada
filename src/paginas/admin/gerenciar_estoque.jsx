@@ -27,12 +27,13 @@ export default function GerenciarEstoque() {
   const carregarDados = async () => {
     try {
       setCarregando(true);
-      const { data: vData } = await supabase.from('variacoes').select('*');
-      const { data: pData } = await supabase.from('products').select('*');
-      setVariacoes(vData || []);
-      setProdutos(pData || []);
+      const [vRes, pRes] = await Promise.all([
+        supabase.from('variacoes').select('*'),
+        supabase.from('products').select('*')
+      ]);
+      setVariacoes(vRes.data || []);
+      setProdutos(pRes.data || []);
     } catch (err) {
-      console.error(err);
       setErro('Erro ao carregar as variações de estoque.');
     } finally {
       setCarregando(false);
