@@ -30,6 +30,8 @@ import VisualizarLogs from "./paginas/admin/visualizar_logs";
 import Configuracoes from "./paginas/admin/configuracoes";
 import ChatIA from "./paginas/admin/chat_ia";
 
+import ErrorBoundary from "./componentes/ErrorBoundary";
+
 // Componente de proteção de rota (redireciona se não logado)
 function RotaProtegida({ children }) {
   const { usuario, carregando } = useAuth();
@@ -69,6 +71,7 @@ export default function App() {
       <Cabecalho />
 
       {/* Rotas */}
+      <ErrorBoundary>
       <Routes>
         {/* Páginas públicas */}
         <Route path="/" element={<Loja />} />
@@ -144,6 +147,7 @@ export default function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </ErrorBoundary>
 
       {/* Elementos flutuantes */}
       <FlutuanteDiscord />

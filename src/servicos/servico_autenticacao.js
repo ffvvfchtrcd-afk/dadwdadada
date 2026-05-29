@@ -128,6 +128,7 @@ export const ServicoAutenticacao = {
       const userStr = localStorage.getItem('nexmarket_user');
       return userStr ? JSON.parse(userStr) : null;
     } catch (erro) {
+      localStorage.removeItem('nexmarket_user');
       return null;
     }
   },

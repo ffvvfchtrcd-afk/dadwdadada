@@ -1,5 +1,17 @@
 import { supabase } from '../configuracoes/supabase';
 
+function msgAmigavel(erro) {
+  if (!erro) return 'Erro desconhecido';
+  const e = String(erro).toLowerCase();
+  if (e.includes('permission') || e.includes('policy') || e.includes('violate') || e.includes('not allowed')) return 'Sem permissão para realizar esta ação.';
+  if (e.includes('duplicate') || e.includes('unique')) return 'Já existe um registro com esses dados.';
+  if (e.includes('not found')) return 'Registro não encontrado.';
+  if (e.includes('foreign key') || e.includes('violates foreign')) return 'Este registro está vinculado a outros dados.';
+  if (e.includes('network') || e.includes('fetch')) return 'Erro de conexão. Verifique sua internet.';
+  if (e.includes('timeout') || e.includes('timed out')) return 'A operação excedeu o tempo limite. Tente novamente.';
+  return String(erro).slice(0, 200);
+}
+
 const FERRAMENTAS = [
   {
     type: 'function',
@@ -122,7 +134,7 @@ async function executar(nome, args) {
     switch (nome) {
       case 'listar_produtos': {
         const { data, error } = await supabase.from('products').select('*');
-        if (error) return { sucesso: false, erro: error.message };
+        if (error) return { sucesso: false, erro: msgAmigavel(error.message) };
         const { data: todasVariacoes } = await supabase.from('variacoes').select('*');
         const variacoes = (data || []).map(p => ({
           ...p,
@@ -139,7 +151,7 @@ async function executar(nome, args) {
           dataCriacao: new Date().toISOString(),
           dataAtualizacao: new Date().toISOString()
         }]);
-        if (error) return { sucesso: false, erro: error.message };
+        if (error) return { sucesso: false, erro: msgAmigavel(error.message) };
         return { sucesso: true, dados: { id } };
       }
       case 'editar_produto': {
@@ -151,7 +163,7 @@ async function executar(nome, args) {
         if (args.status) updates.status = args.status;
         updates.dataAtualizacao = new Date().toISOString();
         const { error } = await supabase.from('products').update(updates).eq('id', args.id);
-        if (error) return { sucesso: false, erro: error.message };
+        if (error) return { sucesso: false, erro: msgAmigavel(error.message) };
         return { sucesso: true };
       }
       case 'deletar_produto': {
@@ -159,10 +171,10 @@ async function executar(nome, args) {
         const idsVar = (vars || []).filter(v => v.produtoId === args.id || v.productId === args.id).map(v => v.id);
         if (idsVar.length > 0) {
           const { error: e1 } = await supabase.from('variacoes').delete().in('id', idsVar);
-          if (e1) return { sucesso: false, erro: e1.message };
+          if (e1) return { sucesso: false, erro: msgAmigavel(e1.message) };
         }
         const { error } = await supabase.from('products').delete().eq('id', args.id);
-        if (error) return { sucesso: false, erro: error.message };
+        if (error) return { sucesso: false, erro: msgAmigavel(error.message) };
         return { sucesso: true };
       }
       case 'adicionar_variacao': {
@@ -174,17 +186,17 @@ async function executar(nome, args) {
           stockData: args.estoque_tipo === 'AUTOMATICA' ? [] : [],
           status: 'ATIVO', dataAtualizacao: new Date().toISOString()
         }]);
-        if (error) return { sucesso: false, erro: error.message };
+        if (error) return { sucesso: false, erro: msgAmigavel(error.message) };
         return { sucesso: true };
       }
       case 'listar_categorias': {
         const { data, error } = await supabase.from('categories').select('*').order('id');
-        if (error) return { sucesso: false, erro: error.message };
+        if (error) return { sucesso: false, erro: msgAmigavel(error.message) };
         return { sucesso: true, dados: data || [] };
       }
       case 'listar_pedidos': {
         const { data, error } = await supabase.from('compras').select('*').limit(args?.limite || 50);
-        if (error) return { sucesso: false, erro: error.message };
+        if (error) return { sucesso: false, erro: msgAmigavel(error.message) };
         const ordenados = (data || []).sort((a, b) => {
           const da = a.dateCreated || a.DateCreated || 0;
           const db = b.dateCreated || b.DateCreated || 0;
@@ -198,7 +210,7 @@ async function executar(nome, args) {
           supabase.from('products').select('id'),
           supabase.from('users').select('id')
         ]);
-        if (compras.error) return { sucesso: false, erro: compras.error.message };
+        if (compras.error) return { sucesso: false, erro: msgAmigavel(compras.error.message) };
         const vendas = compras.data || [];
         const faturamento = vendas.filter(c => ['ENTREGUE', 'PAGO', 'PROCESSANDO'].includes(c.status))
           .reduce((s, c) => s + (c.total || 0), 0);
@@ -226,7 +238,7 @@ async function executar(nome, args) {
         return { sucesso: false, erro: `Ferramenta "${nome}" desconhecida` };
     }
   } catch (err) {
-    return { sucesso: false, erro: err.message };
+    return { sucesso: false, erro: msgAmigavel(err.message) };
   }
 }
 

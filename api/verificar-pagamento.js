@@ -8,9 +8,13 @@ export default async function handler(req, res) {
   if (!req.query.id) return res.status(200).json({ error: 'ID obrigatório' });
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
     const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${req.query.id}`, {
-      headers: { 'Authorization': `Bearer ${accessToken}` }
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+      signal: controller.signal
     });
+    clearTimeout(timeout);
     const data = await mpRes.json();
     return res.status(200).json({ id: data.id, status: data.status, approved: data.status === 'approved' });
   } catch (err) {

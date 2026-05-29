@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contextos/contexto_autenticacao";
 import { useCart } from "../contextos/contexto_carrinho";
@@ -88,11 +88,13 @@ export default function Loja() {
   const categoriasDisponiveis = ['TODAS', ...new Set(produtos.map(p => p.categoriaNome).filter(Boolean))];
 
   // Filtragem de Produtos
-  const produtosFiltrados = produtos.filter((p) => {
-    const matchBusca = p.titulo?.toLowerCase().includes(termoBusca.toLowerCase()) || p.miniDesc?.toLowerCase().includes(termoBusca.toLowerCase()) || p.nome?.toLowerCase().includes(termoBusca.toLowerCase());
-    const matchCategoria = categoriaAtiva === 'TODAS' || p.categoriaNome === categoriaAtiva;
-    return matchBusca && matchCategoria;
-  });
+  const produtosFiltrados = useMemo(() => {
+    return produtos.filter((p) => {
+      const matchBusca = p.titulo?.toLowerCase().includes(termoBusca.toLowerCase()) || p.miniDesc?.toLowerCase().includes(termoBusca.toLowerCase()) || p.nome?.toLowerCase().includes(termoBusca.toLowerCase());
+      const matchCategoria = categoriaAtiva === 'TODAS' || p.categoriaNome === categoriaAtiva;
+      return matchBusca && matchCategoria;
+    });
+  }, [produtos, termoBusca, categoriaAtiva]);
 
   return (
     <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 relative">

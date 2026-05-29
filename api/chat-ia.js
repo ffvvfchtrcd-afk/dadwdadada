@@ -9,6 +9,24 @@ const FERRAMENTAS = [
   { type: 'function', function: { name: 'estatisticas_loja', description: 'Estatísticas completas da loja', parameters: { type: 'object', properties: {} } } }
 ];
 
+async function fetchComRetry(url, options, tentativas = 2) {
+  for (let i = 0; i < tentativas; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok || res.status < 500) return res;
+      if (i < tentativas - 1) {
+        console.warn(`[fetchComRetry] tentativa ${i + 1} falhou (${res.status}), retentando...`);
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    } catch (err) {
+      if (i >= tentativas - 1) throw err;
+      console.warn(`[fetchComRetry] tentativa ${i + 1} excecao: ${err.message}, retentando...`);
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+  return fetch(url, options);
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -35,15 +53,19 @@ export default async function handler(req, res) {
       max_tokens: 1024
     });
 
-    const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    const orRes = await fetchComRetry('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://nexmarket.vercel.app'
       },
-      body
+      body,
+      signal: controller.signal
     });
+    clearTimeout(timeout);
 
     const data = await orRes.json();
 

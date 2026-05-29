@@ -38,6 +38,19 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Validação de sessão na montagem + verificação periódica
+  useEffect(() => {
+    function validarSessao() {
+      const user = ServicoAutenticacao.obterUsuarioLogado();
+      if (user && (!user.id || !user.nome || !user.role)) {
+        sair();
+      }
+    }
+    validarSessao();
+    const interval = setInterval(validarSessao, 300000);
+    return () => clearInterval(interval);
+  }, []);
+
   const entrar = async (email, senha) => {
     setCarregando(true);
     const res = await ServicoAutenticacao.login(email, senha);

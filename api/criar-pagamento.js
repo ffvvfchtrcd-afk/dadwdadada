@@ -14,6 +14,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
     const mpRes = await fetch('https://api.mercadopago.com/v1/payments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
@@ -22,8 +24,10 @@ export default async function handler(req, res) {
         description: description || `Pedido ${pedidoId}`,
         payment_method_id: 'pix',
         payer: { email: email || 'comprador@email.com' }
-      })
+      }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
 
     const data = await mpRes.json();
     if (!mpRes.ok) {

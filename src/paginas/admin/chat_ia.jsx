@@ -21,6 +21,7 @@ export default function ChatIA() {
   ]);
   const [input, setInput] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const enviandoRef = useRef(false);
   const [contexto, setContexto] = useState(null);
   const fimRef = useRef(null);
 
@@ -51,8 +52,9 @@ export default function ChatIA() {
 
   const enviar = async (texto) => {
     const msg = texto || input;
-    if (!msg.trim() || enviando) return;
+    if (!msg.trim() || enviando || enviandoRef.current) return;
     setInput('');
+    enviandoRef.current = true;
 
     const historico = mensagens.slice(1).map(m => ({
       role: m.role,
@@ -62,7 +64,11 @@ export default function ChatIA() {
     setMensagens(prev => [...prev, { role: 'user', content: msg }]);
     setEnviando(true);
 
-    await processarMensagem(msg, historico);
+    try {
+      await processarMensagem(msg, historico);
+    } finally {
+      enviandoRef.current = false;
+    }
   };
 
   const processarMensagem = async (msg, historico, profundidade = 0) => {
@@ -86,9 +92,28 @@ export default function ChatIA() {
 
       if (data.tool_calls?.length > 0) {
         let log = data.content || '';
-        for (const tool of data.tool_calls) {
+        const readOnly = ['listar_produtos', 'listar_categorias', 'listar_pedidos', 'estatisticas_loja', 'recomendar_ajuste_preco'];
+        const roCalls = data.tool_calls.filter(t => readOnly.includes(t.name));
+        const mutCalls = data.tool_calls.filter(t => !readOnly.includes(t.name));
+
+        const resultados = [];
+
+        if (roCalls.length > 0) {
+          const roResults = await Promise.allSettled(
+            roCalls.map(t => FerramentasIA.executar(t.name, t.args))
+          );
+          for (let i = 0; i < roCalls.length; i++) {
+            resultados.push({ tool: roCalls[i], result: roResults[i].status === 'fulfilled' ? roResults[i].value : { sucesso: false, erro: 'Falha na execução paralela' } });
+          }
+        }
+
+        for (const tool of mutCalls) {
           if (!tool.name || !tool.args) continue;
           const result = await FerramentasIA.executar(tool.name, tool.args);
+          resultados.push({ tool, result });
+        }
+
+        for (const { tool, result } of resultados) {
           const resumo = result.sucesso
             ? JSON.stringify(result.dados || { sucesso: true }).slice(0, 1000)
             : `Erro: ${result.erro}`;

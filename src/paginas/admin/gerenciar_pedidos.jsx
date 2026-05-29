@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../../configuracoes/supabase';
 import { useAuth } from '../../contextos/contexto_autenticacao';
 import { ServicoPedidos } from '../../servicos/servico_pedidos';
@@ -95,6 +95,14 @@ export default function GerenciarPedidos() {
     });
   };
 
+  const abrirDetalhes = useCallback((pedido) => {
+    setDetalhesPedido(pedido);
+  }, []);
+
+  const fecharDetalhes = useCallback(() => {
+    setDetalhesPedido(null);
+  }, []);
+
   const lidarComAprovarPagamento = async (pedidoId) => {
     if (processandoPagamento) return;
     setErro(''); setSucesso('');
@@ -112,7 +120,7 @@ export default function GerenciarPedidos() {
     } finally { setProcessandoPagamento(null); }
   };
 
-  const lidarComCancelar = async (pedidoId) => {
+  const lidarComCancelar = useCallback(async (pedidoId) => {
     if (cancelandoPedido) return;
     if (!window.confirm('Deseja realmente cancelar este pedido?')) return;
     setErro('');
@@ -128,9 +136,9 @@ export default function GerenciarPedidos() {
       console.error(err);
       setErro('Erro ao cancelar pedido.');
     } finally { setCancelandoPedido(null); }
-  };
+  }, [cancelandoPedido, carregarPedidos]);
 
-  const submeterEntregaManual = async (e) => {
+  const submeterEntregaManual = useCallback(async (e) => {
     e.preventDefault();
     if (!conteudoEntregaText.trim()) return;
     setEnviandoEntrega(true);
@@ -154,7 +162,7 @@ export default function GerenciarPedidos() {
       console.error(err);
       setErro('Erro ao submeter a entrega.');
     } finally { setEnviandoEntrega(false); }
-  };
+  }, [conteudoEntregaText, pedidoSelecionado, carregarPedidos]);
 
   // Group pedidos by groupId (fallback: each order is its own group)
   const grupos = useMemo(() => {
@@ -423,7 +431,7 @@ export default function GerenciarPedidos() {
                         </div>
 
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <button onClick={() => setDetalhesPedido(p)} className="botao-neutro text-[10px] py-1.5 px-2" title="Detalhes">
+                          <button onClick={() => abrirDetalhes(p)} className="botao-neutro text-[10px] py-1.5 px-2" title="Detalhes">
                             <Eye size={13} />
                           </button>
                           {p.status === 'AGUARDANDO_PAGAMENTO' && (
@@ -460,7 +468,7 @@ export default function GerenciarPedidos() {
                             </div>
                           ))}
                           {p.deliveryContent.length > 2 && (
-                            <button onClick={() => setDetalhesPedido(p)} className="text-[10px] text-zinc-600 hover:text-zinc-400 mt-0.5 font-medium">
+                            <button onClick={() => abrirDetalhes(p)} className="text-[10px] text-zinc-600 hover:text-zinc-400 mt-0.5 font-medium">
                               +{p.deliveryContent.length - 2} mais...
                             </button>
                           )}
@@ -486,7 +494,7 @@ export default function GerenciarPedidos() {
                 </h3>
                 <code className="text-[10px] text-zinc-500 font-mono mt-0.5 block">{detalhesPedido.id}</code>
               </div>
-              <button onClick={() => setDetalhesPedido(null)} className="text-zinc-500 hover:text-white text-lg">✕</button>
+              <button onClick={fecharDetalhes} className="text-zinc-500 hover:text-white text-lg">✕</button>
             </div>
 
             <div className="space-y-4">
@@ -563,10 +571,10 @@ export default function GerenciarPedidos() {
 
             <div className="flex gap-3 justify-end pt-4 mt-4 border-t border-zinc-800">
               {detalhesPedido.status === 'PENDENTE_SUPORTE' && (
-                <button onClick={() => { setPedidoSelecionado(detalhesPedido); setDetalhesPedido(null); setConteudoEntregaText(''); }}
+                <button onClick={() => { setPedidoSelecionado(detalhesPedido); fecharDetalhes(); setConteudoEntregaText(''); }}
                   className="botao-primario text-xs uppercase"><Send size={14} /> Entregar Agora</button>
               )}
-              <button onClick={() => setDetalhesPedido(null)} className="botao-neutro text-xs uppercase">Fechar</button>
+              <button onClick={fecharDetalhes} className="botao-neutro text-xs uppercase">Fechar</button>
             </div>
           </div>
         </div>
