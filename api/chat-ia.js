@@ -19,51 +19,40 @@ export default async function handler(req, res) {
     return res.status(200).json({ role: 'assistant', content: '⚠️ Open Router não configurado.', tool_calls: null });
   }
 
-  const { message, historico, context } = req.body;
+  const { message, historico } = req.body;
   if (!message) return res.status(200).json({ error: 'Mensagem é obrigatória' });
 
-  const catalogo = context?.catalogo || [];
-  const categorias = context?.categorias || [];
-
-  const catalogoTxt = JSON.stringify((catalogo || []).slice(0, 50)).slice(0, 4000);
-
-  const systemMsg = `Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro, de forma direta e prática.
-
-CATÁLOGO (id, nome):
-${catalogoTxt || 'Vazio.'}
-
-CATEGORIAS:
-${JSON.stringify((categorias || []).slice(0, 20)).slice(0, 1000) || 'Vazio.'}
-
-REGRAS:
-- Para EDITAR/DELETAR use o ID do catálogo — não precisa listar_produtos.
-- Para DELETAR, CONFIRME antes.
-- Para variações detalhadas/estatísticas/pedidos, use as ferramentas.`;
-
   try {
+    const body = JSON.stringify({
+      model: 'openai/gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro.' },
+        ...(historico || []),
+        { role: 'user', content: message }
+      ],
+      tools: FERRAMENTAS,
+      tool_choice: 'auto',
+      max_tokens: 1024
+    });
+
     const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': process.env.VERCEL_URL || 'http://localhost:5173'
+        'HTTP-Referer': 'https://nexmarket.vercel.app'
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemMsg },
-          ...(historico || []),
-          { role: 'user', content: message }
-        ],
-        tools: FERRAMENTAS,
-        tool_choice: 'auto',
-        max_tokens: 1024
-      })
+      body
     });
 
     const data = await orRes.json();
+
     if (!orRes.ok) {
-      return res.status(200).json({ role: 'assistant', content: `❌ Erro: ${data.error?.message || 'Erro desconhecido'}`, tool_calls: null });
+      return res.status(200).json({
+        role: 'assistant',
+        content: `❌ Erro OpenRouter (${orRes.status}): ${data.error?.message || JSON.stringify(data).slice(0, 300)}`,
+        tool_calls: null
+      });
     }
 
     const choice = data.choices?.[0]?.message;
@@ -81,6 +70,10 @@ REGRAS:
 
     return res.status(200).json({ role: 'assistant', content: choice?.content || 'Sem resposta.', tool_calls: null });
   } catch (err) {
-    return res.status(200).json({ role: 'assistant', content: `❌ Erro: ${err.message}`, tool_calls: null });
+    return res.status(200).json({
+      role: 'assistant',
+      content: `❌ Erro interno: ${err.message} (${err.name})`,
+      tool_calls: null
+    });
   }
 }
