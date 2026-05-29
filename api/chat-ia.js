@@ -19,8 +19,31 @@ export default async function handler(req, res) {
     return res.status(200).json({ role: 'assistant', content: '⚠️ Open Router não configurado.', tool_calls: null });
   }
 
-  const { message, historico } = req.body;
+  const { message, historico, context } = req.body;
   if (!message) return res.status(200).json({ error: 'Mensagem é obrigatória' });
+
+  const catalogo = context?.catalogo || [];
+  const categorias = context?.categorias || [];
+
+  const catalogoCompacto = (catalogo || []).slice(0, 50).map(p => ({
+    id: p.id, nome: p.nome, status: p.status,
+    variacoes: (p.variacoes || []).map(v => ({ id: v.id, nome: v.nome, preco: v.preco }))
+  }));
+
+  const systemMsg = `Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro, de forma direta e prática.
+
+Você TEM acesso ao catálogo abaixo. NÃO precisa chamar listar_produtos — use estes IDs diretamente.
+
+CATÁLOGO:
+${JSON.stringify(catalogoCompacto).slice(0, 4000) || 'Vazio.'}
+
+CATEGORIAS:
+${JSON.stringify((categorias || []).map(c => ({ id: c.id, nome: c.nome }))).slice(0, 1000) || 'Vazio.'}
+
+REGRAS:
+- Para EDITAR/DELETAR use o ID do catálogo acima.
+- Para DELETAR, CONFIRME antes perguntando "Tem certeza?".
+- Para estatísticas/pedidos, use as ferramentas específicas.`;
 
   try {
     const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -33,7 +56,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro, de forma direta e prática. Você TEM ferramentas disponíveis para listar, criar, editar e deletar produtos, e ver estatísticas. USE-AS sempre que o usuário pedir algo que elas podem fazer. Se o usuário pedir para deletar, CONFIRME antes de executar.' },
+          { role: 'system', content: systemMsg },
           ...(historico || []),
           { role: 'user', content: message }
         ],

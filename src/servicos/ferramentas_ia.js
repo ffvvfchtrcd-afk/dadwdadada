@@ -118,99 +118,109 @@ const FERRAMENTAS = [
 ];
 
 async function executar(nome, args) {
-  switch (nome) {
-    case 'listar_produtos': {
-      const { data } = await supabase.from('products').select('*');
-      const variacoes = await Promise.all((data || []).map(async p => {
-        const { data: v } = await supabase.from('variacoes').select('*').eq('produtoId', p.id);
-        return { ...p, variacoes: v || [] };
-      }));
-      return { sucesso: true, dados: variacoes };
+  try {
+    switch (nome) {
+      case 'listar_produtos': {
+        const { data, error } = await supabase.from('products').select('*');
+        if (error) return { sucesso: false, erro: error.message };
+        const variacoes = await Promise.all((data || []).map(async p => {
+          const { data: v, error: e2 } = await supabase.from('variacoes').select('*').eq('"produtoId"', p.id);
+          return { ...p, variacoes: e2 ? [] : (v || []) };
+        }));
+        return { sucesso: true, dados: variacoes };
+      }
+      case 'criar_produto': {
+        const id = Date.now();
+        const { error } = await supabase.from('products').insert([{
+          id, nome: args.nome, descricao: args.descricao || '',
+          miniDesc: args.miniDesc || '', bannerUrl: args.bannerUrl || '',
+          categoria: String(args.categoriaId), status: 'ATIVO',
+          dataCriacao: new Date().toISOString(),
+          dataAtualizacao: new Date().toISOString()
+        }]);
+        if (error) return { sucesso: false, erro: error.message };
+        return { sucesso: true, dados: { id } };
+      }
+      case 'editar_produto': {
+        const updates = {};
+        if (args.nome) updates.nome = args.nome;
+        if (args.descricao) updates.descricao = args.descricao;
+        if (args.miniDesc) updates.miniDesc = args.miniDesc;
+        if (args.bannerUrl) updates.bannerUrl = args.bannerUrl;
+        if (args.status) updates.status = args.status;
+        updates.dataAtualizacao = new Date().toISOString();
+        const { error } = await supabase.from('products').update(updates).eq('id', args.id);
+        if (error) return { sucesso: false, erro: error.message };
+        return { sucesso: true };
+      }
+      case 'deletar_produto': {
+        const { error: e1 } = await supabase.from('variacoes').delete().eq('"produtoId"', args.id);
+        if (e1) return { sucesso: false, erro: e1.message };
+        const { error } = await supabase.from('products').delete().eq('id', args.id);
+        if (error) return { sucesso: false, erro: error.message };
+        return { sucesso: true };
+      }
+      case 'adicionar_variacao': {
+        const varId = Date.now() + Math.floor(Math.random() * 1000);
+        const { error } = await supabase.from('variacoes').insert([{
+          id: String(varId), produtoId: args.produtoId, nome: args.nome,
+          preco: args.preco, estoque_tipo: args.estoque_tipo,
+          quantidadeStock: args.quantidadeStock || 0,
+          stockData: args.estoque_tipo === 'AUTOMATICA' ? [] : [],
+          status: 'ATIVO', dataAtualizacao: new Date().toISOString()
+        }]);
+        if (error) return { sucesso: false, erro: error.message };
+        return { sucesso: true };
+      }
+      case 'listar_categorias': {
+        const { data, error } = await supabase.from('categories').select('*').order('id');
+        if (error) return { sucesso: false, erro: error.message };
+        return { sucesso: true, dados: data || [] };
+      }
+      case 'listar_pedidos': {
+        const { data, error } = await supabase.from('compras')
+          .select('*').order('"dateCreated"', { ascending: false }).limit(args?.limite || 10);
+        if (error) return { sucesso: false, erro: error.message };
+        return { sucesso: true, dados: data || [] };
+      }
+      case 'estatisticas_loja': {
+        const [compras, products, users] = await Promise.all([
+          supabase.from('compras').select('total, status'),
+          supabase.from('products').select('id'),
+          supabase.from('users').select('id')
+        ]);
+        if (compras.error) return { sucesso: false, erro: compras.error.message };
+        const vendas = compras.data || [];
+        const faturamento = vendas.filter(c => ['ENTREGUE', 'PAGO', 'PROCESSANDO'].includes(c.status))
+          .reduce((s, c) => s + (c.total || 0), 0);
+        return { sucesso: true, dados: {
+          produtos: (products.data || []).length,
+          usuarios: (users.data || []).length,
+          pedidos: vendas.length,
+          faturamento: faturamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+          pendentes: vendas.filter(c => c.status === 'AGUARDANDO_PAGAMENTO').length,
+          entregues: vendas.filter(c => c.status === 'ENTREGUE').length
+        }};
+      }
+      case 'recomendar_ajuste_preco': {
+        const { data: produtos, error: e1 } = await supabase.from('products').select('*');
+        if (e1) return { sucesso: false, erro: e1.message };
+        const variacoes = await Promise.all((produtos || []).map(async p => {
+          const { data: v, error: e2 } = await supabase.from('variacoes').select('*').eq('"produtoId"', p.id);
+          return e2 ? [] : (v || []);
+        }));
+        const todas = variacoes.flat();
+        return { sucesso: true, dados: {
+          total_produtos: produtos?.length || 0,
+          precos: todas.map(v => ({ nome: v.nome, preco: v.preco, tipo: v.estoque_tipo })),
+          sugestao: 'Analise os preços acima. Considere comparar com concorrentes e ajustar margens entre 30-70%.'
+        }};
+      }
+      default:
+        return { sucesso: false, erro: `Ferramenta "${nome}" desconhecida` };
     }
-    case 'criar_produto': {
-      const id = Date.now();
-      const { error } = await supabase.from('products').insert([{
-        id, nome: args.nome, descricao: args.descricao || '',
-        miniDesc: args.miniDesc || '', bannerUrl: args.bannerUrl || '',
-        categoria: String(args.categoriaId), status: 'ATIVO',
-        dataCriacao: new Date().toISOString(),
-        dataAtualizacao: new Date().toISOString()
-      }]);
-      if (error) return { sucesso: false, erro: error.message };
-      return { sucesso: true, dados: { id } };
-    }
-    case 'editar_produto': {
-      const updates = {};
-      if (args.nome) updates.nome = args.nome;
-      if (args.descricao) updates.descricao = args.descricao;
-      if (args.miniDesc) updates.miniDesc = args.miniDesc;
-      if (args.bannerUrl) updates.bannerUrl = args.bannerUrl;
-      if (args.status) updates.status = args.status;
-      updates.dataAtualizacao = new Date().toISOString();
-      const { error } = await supabase.from('products').update(updates).eq('id', args.id);
-      if (error) return { sucesso: false, erro: error.message };
-      return { sucesso: true };
-    }
-    case 'deletar_produto': {
-      await supabase.from('variacoes').delete().eq('produtoId', args.id);
-      const { error } = await supabase.from('products').delete().eq('id', args.id);
-      if (error) return { sucesso: false, erro: error.message };
-      return { sucesso: true };
-    }
-    case 'adicionar_variacao': {
-      const varId = Date.now() + Math.floor(Math.random() * 1000);
-      const { error } = await supabase.from('variacoes').insert([{
-        id: String(varId), produtoId: args.produtoId, nome: args.nome,
-        preco: args.preco, estoque_tipo: args.estoque_tipo,
-        quantidadeStock: args.quantidadeStock || 0,
-        stockData: args.estoque_tipo === 'AUTOMATICA' ? [] : [],
-        status: 'ATIVO', dataAtualizacao: new Date().toISOString()
-      }]);
-      if (error) return { sucesso: false, erro: error.message };
-      return { sucesso: true };
-    }
-    case 'listar_categorias': {
-      const { data } = await supabase.from('categories').select('*').order('id');
-      return { sucesso: true, dados: data || [] };
-    }
-    case 'listar_pedidos': {
-      const { data } = await supabase.from('compras')
-        .select('*').order('date', { ascending: false }).limit(args?.limite || 10);
-      return { sucesso: true, dados: data || [] };
-    }
-    case 'estatisticas_loja': {
-      const [compras, products, users] = await Promise.all([
-        supabase.from('compras').select('total, status'),
-        supabase.from('products').select('id'),
-        supabase.from('users').select('id')
-      ]);
-      const vendas = compras.data || [];
-      const faturamento = vendas.filter(c => ['ENTREGUE', 'PAGO', 'PROCESSANDO'].includes(c.status))
-        .reduce((s, c) => s + (c.total || 0), 0);
-      return { sucesso: true, dados: {
-        produtos: (products.data || []).length,
-        usuarios: (users.data || []).length,
-        pedidos: vendas.length,
-        faturamento: faturamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-        pendentes: vendas.filter(c => c.status === 'AGUARDANDO_PAGAMENTO').length,
-        entregues: vendas.filter(c => c.status === 'ENTREGUE').length
-      }};
-    }
-    case 'recomendar_ajuste_preco': {
-      const { data: produtos } = await supabase.from('products').select('*');
-      const variacoes = await Promise.all((produtos || []).map(async p => {
-        const { data: v } = await supabase.from('variacoes').select('*').eq('produtoId', p.id);
-        return v || [];
-      }));
-      const todas = variacoes.flat();
-      return { sucesso: true, dados: {
-        total_produtos: produtos?.length || 0,
-        precos: todas.map(v => ({ nome: v.nome, preco: v.preco, tipo: v.estoque_tipo })),
-        sugestao: 'Analise os preços acima. Considere comparar com concorrentes e ajustar margens entre 30-70%.'
-      }};
-    }
-    default:
-      return { sucesso: false, erro: `Ferramenta "${nome}" desconhecida` };
+  } catch (err) {
+    return { sucesso: false, erro: err.message };
   }
 }
 
