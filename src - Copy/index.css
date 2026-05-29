@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset e variáveis de cores */
+@layer base {
+  :root {
+    --fundo-escuro: #09090b;
+    --fundo-card: #18181b;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    background-color: var(--fundo-escuro);
+    color: #f4f4f5;
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--fundo-escuro);
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+@layer components {
+  /* Base de botões compartilhada */
+  .btn-base, .botao-primario, .botao-secundario, .botao-neutro, .botao-sucesso, .botao-perigo {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-darkBg disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .botao-primario {
+    @apply bg-primary text-white hover:bg-primaryHover focus:ring-primary shadow-sm hover:shadow-lg;
+  }
+
+  .botao-secundario {
+    @apply bg-secondary text-white hover:bg-secondaryHover focus:ring-secondary shadow-sm;
+  }
+
+  .botao-neutro {
+    @apply bg-zinc-800 text-zinc-100 border border-zinc-700 hover:bg-zinc-700 focus:ring-zinc-500;
+  }
+
+  .botao-sucesso {
+    @apply bg-success text-white hover:bg-emerald-600 focus:ring-success shadow-sm;
+  }
+
+  .botao-perigo {
+    @apply bg-danger text-white hover:bg-rose-600 focus:ring-danger shadow-sm;
+  }
+
+  /* Inputs padronizados */
+  .input-padrao {
+    @apply w-full bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-lg px-4 py-2.5 text-sm outline-none transition-all duration-200 placeholder-zinc-500 focus:border-primary focus:ring-1 focus:ring-primary shadow-inner;
+  }
+
+  /* Cards padronizados */
+  .card-padrao {
+    @apply bg-cardBg border border-zinc-800/60 rounded-xl shadow-md transition-all duration-300;
+  }
+  .card-padrao:hover {
+    @apply border-zinc-700/80 shadow-xl shadow-black/40 -translate-y-0.5;
+  }
+}
+
+@layer utilities {
+  /* Banner de Texto Rolante */
+  .banner-rolante {
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    background-color: theme('colors.primary');
+    padding: 6px 0;
+    width: 100%;
+  }
+
+  .marquise-content {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-around;
+    min-width: 100%;
+    animation: rolarMarquise 25s linear infinite;
+    gap: 40px;
+  }
+
+  @keyframes rolarMarquise {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+
+  /* Estilo para overlays/modais escuros */
+  .modal-overlay {
+    background-color: rgba(9, 9, 11, 0.85);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Efeitos utilitários */
+  .glow-primary {
+    text-shadow: 0 0 16px rgba(139, 92, 246, 0.4);
+  }
+}
+

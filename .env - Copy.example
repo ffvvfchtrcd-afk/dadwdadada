@@ -1,0 +1,11 @@
+# SUPABASE (obrigatório)
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anon-aqui
+
+# MERCADO PAGO (obrigatório para pagamentos reais)
+# Obtenha em: Mercado Pago > Credenciais > Access Token (Produção)
+MERCADO_PAGO_ACCESS_TOKEN=seu-access-token-aqui
+
+# OPEN ROUTER (opcional — assistente IA no admin)
+# Obtenha em: https://openrouter.ai/keys
+OPEN_ROUTER_API_KEY=sk-or-v1-sua-chave-aqui
