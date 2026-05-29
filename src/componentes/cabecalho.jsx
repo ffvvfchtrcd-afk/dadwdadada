@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contextos/contexto_autenticacao";
 import { useCart } from "../contextos/contexto_carrinho";
 import { useConfig } from "../contextos/contexto_configuracao";
+import { CONFIGURACOES } from "../configuracoes/config";
 import { ShoppingCart, Headphones, LogIn, LogOut, LayoutDashboard, User, Menu, Bell, BellRing, Settings } from "lucide-react";
 import { FormatarMoeda } from "../utilitarios/formatadores";
 import { ServicoNotificacoes } from "../servicos/servico_notificacoes";
