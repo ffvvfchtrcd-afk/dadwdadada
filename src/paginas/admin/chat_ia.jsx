@@ -71,8 +71,10 @@ export default function ChatIA() {
     }
   };
 
+  const MAX_PROFUNDIDADE = 10;
+
   const processarMensagem = async (msg, historico, profundidade = 0) => {
-    if (profundidade >= 5) {
+    if (profundidade >= MAX_PROFUNDIDADE) {
       setMensagens(prev => [...prev, { role: 'assistant', content: '⚠️ Número máximo de ações em sequência atingido.' }]);
       setEnviando(false);
       return;
@@ -92,33 +94,16 @@ export default function ChatIA() {
 
       if (data.tool_calls?.length > 0) {
         let log = data.content || '';
-        const readOnly = ['listar_produtos', 'listar_categorias', 'listar_pedidos', 'estatisticas_loja', 'recomendar_ajuste_preco'];
-        const roCalls = data.tool_calls.filter(t => readOnly.includes(t.name));
-        const mutCalls = data.tool_calls.filter(t => !readOnly.includes(t.name));
-
-        const resultados = [];
-
-        if (roCalls.length > 0) {
-          const roResults = await Promise.allSettled(
-            roCalls.map(t => FerramentasIA.executar(t.name, t.args))
-          );
-          for (let i = 0; i < roCalls.length; i++) {
-            resultados.push({ tool: roCalls[i], result: roResults[i].status === 'fulfilled' ? roResults[i].value : { sucesso: false, erro: 'Falha na execução paralela' } });
-          }
-        }
-
-        for (const tool of mutCalls) {
+        let algumSucesso = false;
+        for (const tool of data.tool_calls) {
           if (!tool.name || !tool.args) continue;
           const result = await FerramentasIA.executar(tool.name, tool.args);
-          resultados.push({ tool, result });
-        }
-
-        for (const { tool, result } of resultados) {
           const resumo = result.sucesso
             ? JSON.stringify(result.dados || { sucesso: true }).slice(0, 1000)
             : `Erro: ${result.erro}`;
 
           if (result.sucesso) {
+            algumSucesso = true;
             if (profundidade === 0) {
               const acoesComFestas = ['deletar_produto', 'criar_produto', 'editar_produto', 'adicionar_variacao'];
               if (acoesComFestas.includes(tool.name)) {
@@ -127,6 +112,19 @@ export default function ChatIA() {
             }
             log += `\n\n[Ferramenta: ${tool.name}] OK`;
           } else {
+            log += `\n\n[Ferramenta: ${tool.name}] Erro: ${resumo}`;
+          }
+        }
+
+        if (!algumSucesso) {
+          setMensagens(prev => [...prev, { role: 'assistant', content: data.content || 'Não foi possível executar esta ação.' }]);
+        } else {
+          await processarMensagem(msg, [
+            ...historico,
+            { role: 'assistant', content: log }
+          ], profundidade + 1);
+        }
+      } else {
             log += `\n\n[Ferramenta: ${tool.name}] Erro: ${resumo}`;
           }
         }
