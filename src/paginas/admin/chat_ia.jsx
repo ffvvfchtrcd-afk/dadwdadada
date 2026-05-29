@@ -63,7 +63,7 @@ export default function ChatIA() {
     await processarMensagem(msg, historico);
   };
 
-  const processarMensagem = async (msg, historico) => {
+  const processarMensagem = async (msg, historico, recursivo = false) => {
     try {
       const res = await fetch('/api/chat-ia', {
         method: 'POST',
@@ -73,37 +73,35 @@ export default function ChatIA() {
       const data = await res.json();
 
       if (data.tool_calls?.length > 0) {
+        let log = data.content || '';
         for (const tool of data.tool_calls) {
-          const result = await FerramentasIA.executar(tool.name, tool.arguments);
+          const result = await FerramentasIA.executar(tool.name, tool.args);
           const resumo = result.sucesso
-            ? JSON.stringify(result.dados || { sucesso: true }).slice(0, 2000)
+            ? JSON.stringify(result.dados || { sucesso: true }).slice(0, 1000)
             : `Erro: ${result.erro}`;
 
-          if (result.sucesso && (tool.name === 'deletar_produto' || tool.name === 'criar_produto' || tool.name === 'editar_produto' || tool.name === 'adicionar_variacao')) {
-            confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 }, colors: ['#00e676', '#b92cff'] });
+          if (result.sucesso) {
+            const acoesComFestas = ['deletar_produto', 'criar_produto', 'editar_produto', 'adicionar_variacao'];
+            if (acoesComFestas.includes(tool.name) && !recursivo) {
+              confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 }, colors: ['#00e676', '#b92cff'] });
+            }
+            log += `\n\n[Ferramenta: ${tool.name}] Resultado: ${resumo}`;
+          } else {
+            log += `\n\n[Ferramenta: ${tool.name}] Erro: ${resumo}`;
           }
-
-          const novoHistorico = [
-            ...historico,
-            { role: 'assistant', content: data.content || '' },
-            { role: 'user', content: `[Resultado da ferramenta ${tool.name}]: ${resumo}\n\nCom base nisso, responda o usuário de forma amigável em português.` }
-          ];
-
-          const res2 = await fetch('/api/chat-ia', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: msg, historico: novoHistorico, context: contexto })
-          });
-          const data2 = await res2.json();
-
-          setMensagens(prev => [...prev, {
-            role: 'assistant',
-            content: data2.content || 'Pronto!',
-            tool_usada: tool.name
-          }]);
         }
+
+        await processarMensagem(msg, [
+          ...historico,
+          { role: 'assistant', content: log }
+        ], true);
       } else {
-        setMensagens(prev => [...prev, { role: 'assistant', content: data.content }]);
+        if (!recursivo) {
+          setMensagens(prev => [...prev, { role: 'assistant', content: data.content }]);
+        } else {
+          // Mostra o tool log + a resposta final da IA
+          setMensagens(prev => [...prev, { role: 'assistant', content: data.content || 'Pronto!' }]);
+        }
       }
     } catch (err) {
       setMensagens(prev => [...prev, { role: 'assistant', content: `❌ Erro: ${err.message}` }]);
