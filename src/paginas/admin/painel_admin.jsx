@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contextos/contexto_autenticacao';
 import { supabase } from '../../configuracoes/supabase';
 import { Link, useNavigate } from 'react-router-dom';
-import { BarChart3, Users, ShoppingBag, Layers, Key, ArrowLeft, ShieldAlert, Package, Clock, CheckCircle, AlertTriangle, Database } from 'lucide-react';
+import { BarChart3, Users, ShoppingBag, Layers, Key, ArrowLeft, ShieldAlert, Package, Clock, CheckCircle, AlertTriangle, Database, Settings, Bot } from 'lucide-react';
 import { FormatarMoeda } from '../../utilitarios/formatadores';
 
 export default function PainelAdmin() {
@@ -226,6 +226,8 @@ export default function PainelAdmin() {
     { to: '/admin/pedidos', icone: Package, cor: 'text-cyan-400', titulo: 'Pedidos & Entregas', desc: 'Ver pedidos e entregar manuais' },
     { to: '/admin/usuarios', icone: Users, cor: 'text-emerald-400', titulo: 'Usuários', desc: 'Gerenciar saldo e permissões' },
     { to: '/admin/logs', icone: BarChart3, cor: 'text-zinc-400', titulo: 'Logs', desc: 'Auditar registros do sistema' },
+    { to: '/admin/configuracoes', icone: Settings, cor: 'text-zinc-400', titulo: 'Configurações', desc: 'Nome, links e cupons' },
+    { to: '/admin/chat-ia', icone: Bot, cor: 'text-secondary', titulo: 'Assistente IA', desc: 'Chat com IA para dicas e conteúdos' },
   ];
 
   return (

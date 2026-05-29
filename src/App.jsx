@@ -28,6 +28,7 @@ import GerenciarPedidos from "./paginas/admin/gerenciar_pedidos";
 import GerenciarUsuarios from "./paginas/admin/gerenciar_usuarios";
 import VisualizarLogs from "./paginas/admin/visualizar_logs";
 import Configuracoes from "./paginas/admin/configuracoes";
+import ChatIA from "./paginas/admin/chat_ia";
 
 // Componente de proteção de rota (redireciona se não logado)
 function RotaProtegida({ children }) {
@@ -132,6 +133,11 @@ export default function App() {
         <Route path="/admin/configuracoes" element={
           <RotaAdmin>
             <Configuracoes />
+          </RotaAdmin>
+        } />
+        <Route path="/admin/chat-ia" element={
+          <RotaAdmin>
+            <ChatIA />
           </RotaAdmin>
         } />
 
