@@ -35,23 +35,16 @@ export default function ChatIA() {
 
   const carregarContexto = async () => {
     try {
-      const [compras, products, categorias] = await Promise.all([
-        supabase.from('compras').select('total, status'),
-        supabase.from('products').select('id, nome, status, categoria'),
+      const [products, categorias] = await Promise.all([
+        supabase.from('products').select('id, nome, status'),
         supabase.from('categories').select('id, nome').order('id')
       ]);
 
-      const variacoes = await Promise.all((products.data || []).map(async p => {
-        const { data: v } = await supabase.from('variacoes').select('id, nome, preco, estoque_tipo, status').eq('"produtoId"', p.id);
-        return { id: p.id, nome: p.nome, status: p.status, variacoes: v || [] };
-      }));
-
       setContexto({
         nomeLoja: 'NEXMARKET',
-        catalogo: variacoes,
+        catalogo: products.data || [],
         categorias: categorias.data || [],
         produtosCount: (products.data || []).length,
-        pedidosCount: (compras.data || []).length,
       });
     } catch {}
   };

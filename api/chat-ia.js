@@ -25,25 +25,20 @@ export default async function handler(req, res) {
   const catalogo = context?.catalogo || [];
   const categorias = context?.categorias || [];
 
-  const catalogoCompacto = (catalogo || []).slice(0, 50).map(p => ({
-    id: p.id, nome: p.nome, status: p.status,
-    variacoes: (p.variacoes || []).map(v => ({ id: v.id, nome: v.nome, preco: v.preco }))
-  }));
+  const catalogoTxt = JSON.stringify((catalogo || []).slice(0, 50)).slice(0, 4000);
 
   const systemMsg = `Você é o assistente IA da loja NEXMARKET. Responda em português brasileiro, de forma direta e prática.
 
-Você TEM acesso ao catálogo abaixo. NÃO precisa chamar listar_produtos — use estes IDs diretamente.
-
-CATÁLOGO:
-${JSON.stringify(catalogoCompacto).slice(0, 4000) || 'Vazio.'}
+CATÁLOGO (id, nome):
+${catalogoTxt || 'Vazio.'}
 
 CATEGORIAS:
-${JSON.stringify((categorias || []).map(c => ({ id: c.id, nome: c.nome }))).slice(0, 1000) || 'Vazio.'}
+${JSON.stringify((categorias || []).slice(0, 20)).slice(0, 1000) || 'Vazio.'}
 
 REGRAS:
-- Para EDITAR/DELETAR use o ID do catálogo acima.
-- Para DELETAR, CONFIRME antes perguntando "Tem certeza?".
-- Para estatísticas/pedidos, use as ferramentas específicas.`;
+- Para EDITAR/DELETAR use o ID do catálogo — não precisa listar_produtos.
+- Para DELETAR, CONFIRME antes.
+- Para variações detalhadas/estatísticas/pedidos, use as ferramentas.`;
 
   try {
     const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
