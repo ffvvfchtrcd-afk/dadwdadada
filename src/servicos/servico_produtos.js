@@ -45,18 +45,15 @@ export const ServicoProdutos = {
       const catMap = {};
       (categorias || []).forEach(c => catMap[c.id] = c.nome);
 
-      // Junta produtos com suas variações correspondentes e calcula o menor preço
       const produtosCompletos = (products || []).map(p => {
-        const pVars = (variations || []).filter(v => v.produtoId === p.id);
+        const pVars = (variations || []).filter(v => v.produtoId === p.id || v.productId === p.id);
         const minPrice = pVars.length > 0 ? Math.min(...pVars.map(v => v.preco)) : 0;
         
         return {
           ...p,
-          precoAtual: minPrice, // Preço mínimo exibido na vitrine
+          precoAtual: minPrice,
           variacoes: pVars,
-          // Nome da categoria a partir do ID
-          categoriaNome: catMap[p.categoriaId] || 'Sem Categoria',
-          // Compatibilidade com o formato frontend antigo
+          categoriaNome: catMap[Number(p.categoria)] || catMap[p.categoria] || 'Sem Categoria',
           titulo: p.nome,
           estoque: pVars.reduce((sum, v) => sum + (v.quantidadeStock || 0), 0)
         };
@@ -72,48 +69,26 @@ export const ServicoProdutos = {
   // Busca um único produto por ID com suas variações
   async obterProdutoPorId(id) {
     try {
-      const idTexto = String(id);
-
-      // Tenta com ::text (funciona para UUID, text e varchar)
-      let { data: product, error: pErr } = await supabase
+      const { data: product, error: pErr } = await supabase
         .from('products')
         .select('*')
-        .eq('id::text', idTexto)
+        .eq('id', Number(id))
         .maybeSingle();
 
-      // Se ::text falhou, tenta sem cast (para colunas int8)
-      if (pErr) {
-        const fb = await supabase
-          .from('products')
-          .select('*')
-          .eq('id', id)
-          .maybeSingle();
-        if (fb.error) throw fb.error;
-        product = fb.data;
+      if (pErr || !product) {
+        if (pErr) ServicoLogs.adicionarLog("PRODUTOS_DETALHE_ERRO", pErr.message, "erro");
+        return null;
       }
 
-      if (!product) return null;
-
-      const { data: variations, error: vErr } = await supabase
+      const { data: variations } = await supabase
         .from('variacoes')
         .select('*')
-        .eq('produtoId::text', idTexto)
         .eq('status', 'ATIVO');
-
-      if (vErr) {
-        const fb = await supabase
-          .from('variacoes')
-          .select('*')
-          .eq('produtoId', id)
-          .eq('status', 'ATIVO');
-        if (fb.error) throw fb.error;
-        return { ...product, titulo: product.nome, variacoes: fb.data || [] };
-      }
 
       return {
         ...product,
         titulo: product.nome,
-        variacoes: variations || []
+        variacoes: (variations || []).filter(v => v.produtoId === product.id || v.productId === product.id)
       };
     } catch (erro) {
       ServicoLogs.adicionarLog("PRODUTOS_DETALHE_ERRO", erro.message, "erro");

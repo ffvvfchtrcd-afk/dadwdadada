@@ -19,16 +19,17 @@ export default function ModalPix({
   const [copiadoIndice, setCopiadoIndice] = useState(null);
   const [pedidoAtualizado, setPedidoAtualizado] = useState(null);
 
-  // Inicializa a cobranÃ§a PIX
   useEffect(() => {
     if (pedidoId && total) {
-      try {
-        const novaCobranca = ServicoPagamento.gerarCobrancaPix(pedidoId, total);
-        setCobranca(novaCobranca);
-        setTempoRestante(novaCobranca.expiraEmSegundos);
-      } catch (err) {
-        console.error(err);
-      }
+      (async () => {
+        try {
+          const novaCobranca = await ServicoPagamento.criarCobrancaPix(pedidoId, total);
+          setCobranca(novaCobranca);
+          setTempoRestante(novaCobranca.expiraEmSegundos);
+        } catch (err) {
+          console.error(err);
+        }
+      })();
     }
   }, [pedidoId, total]);
 
@@ -75,10 +76,6 @@ export default function ModalPix({
 
         if (!error && compra) {
           setPedidoAtualizado(compra);
-          // Se o produto foi entregue automaticamente, atualiza o estoque local
-          if (compra.status === 'ENTREGUE' && aoAtualizarEstoque) {
-            aoAtualizarEstoque(compra.productId, compra.quantity);
-          }
         }
         
         setStatus("aprovado");
@@ -134,7 +131,7 @@ export default function ModalPix({
             {/* QR Code */}
             <div className="mx-auto w-[200px] h-[200px] bg-white border-4 border-black p-2 rounded-2xl shadow-[4px_4px_0px_#b92cff] flex items-center justify-center">
               <img 
-                src={cobranca.qrcodeSimulado} 
+                src={cobranca.qrCodeBase64} 
                 alt="QR Code Pix" 
                 className="w-full h-full select-none" 
               />

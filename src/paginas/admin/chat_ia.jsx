@@ -65,7 +65,12 @@ export default function ChatIA() {
     await processarMensagem(msg, historico);
   };
 
-  const processarMensagem = async (msg, historico, recursivo = false) => {
+  const processarMensagem = async (msg, historico, profundidade = 0) => {
+    if (profundidade >= 5) {
+      setMensagens(prev => [...prev, { role: 'assistant', content: '⚠️ Número máximo de ações em sequência atingido.' }]);
+      setEnviando(false);
+      return;
+    }
     try {
       const res = await fetch('/api/chat-ia', {
         method: 'POST',
@@ -74,20 +79,28 @@ export default function ChatIA() {
       });
       const data = await res.json();
 
+      if (data.error) {
+        setMensagens(prev => [...prev, { role: 'assistant', content: `❌ ${data.error}` }]);
+        return;
+      }
+
       if (data.tool_calls?.length > 0) {
         let log = data.content || '';
         for (const tool of data.tool_calls) {
+          if (!tool.name || !tool.args) continue;
           const result = await FerramentasIA.executar(tool.name, tool.args);
           const resumo = result.sucesso
             ? JSON.stringify(result.dados || { sucesso: true }).slice(0, 1000)
             : `Erro: ${result.erro}`;
 
           if (result.sucesso) {
-            const acoesComFestas = ['deletar_produto', 'criar_produto', 'editar_produto', 'adicionar_variacao'];
-            if (acoesComFestas.includes(tool.name) && !recursivo) {
-              confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 }, colors: ['#00e676', '#b92cff'] });
+            if (profundidade === 0) {
+              const acoesComFestas = ['deletar_produto', 'criar_produto', 'editar_produto', 'adicionar_variacao'];
+              if (acoesComFestas.includes(tool.name)) {
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 }, colors: ['#00e676', '#b92cff'] });
+              }
             }
-            log += `\n\n[Ferramenta: ${tool.name}] Resultado: ${resumo}`;
+            log += `\n\n[Ferramenta: ${tool.name}] OK`;
           } else {
             log += `\n\n[Ferramenta: ${tool.name}] Erro: ${resumo}`;
           }
@@ -96,14 +109,9 @@ export default function ChatIA() {
         await processarMensagem(msg, [
           ...historico,
           { role: 'assistant', content: log }
-        ], true);
+        ], profundidade + 1);
       } else {
-        if (!recursivo) {
-          setMensagens(prev => [...prev, { role: 'assistant', content: data.content }]);
-        } else {
-          // Mostra o tool log + a resposta final da IA
-          setMensagens(prev => [...prev, { role: 'assistant', content: data.content || 'Pronto!' }]);
-        }
+        setMensagens(prev => [...prev, { role: 'assistant', content: data.content || 'Pronto!' }]);
       }
     } catch (err) {
       setMensagens(prev => [...prev, { role: 'assistant', content: `❌ Erro: ${err.message}` }]);

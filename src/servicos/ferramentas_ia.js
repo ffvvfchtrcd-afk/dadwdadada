@@ -123,9 +123,10 @@ async function executar(nome, args) {
       case 'listar_produtos': {
         const { data, error } = await supabase.from('products').select('*');
         if (error) return { sucesso: false, erro: error.message };
-        const variacoes = await Promise.all((data || []).map(async p => {
-          const { data: v, error: e2 } = await supabase.from('variacoes').select('*').eq('"produtoId"', p.id);
-          return { ...p, variacoes: e2 ? [] : (v || []) };
+        const { data: todasVariacoes } = await supabase.from('variacoes').select('*');
+        const variacoes = (data || []).map(p => ({
+          ...p,
+          variacoes: (todasVariacoes || []).filter(v => v.produtoId === p.id || v.productId === p.id)
         }));
         return { sucesso: true, dados: variacoes };
       }
@@ -154,8 +155,12 @@ async function executar(nome, args) {
         return { sucesso: true };
       }
       case 'deletar_produto': {
-        const { error: e1 } = await supabase.from('variacoes').delete().eq('"produtoId"', args.id);
-        if (e1) return { sucesso: false, erro: e1.message };
+        const { data: vars } = await supabase.from('variacoes').select('id');
+        const idsVar = (vars || []).filter(v => v.produtoId === args.id || v.productId === args.id).map(v => v.id);
+        if (idsVar.length > 0) {
+          const { error: e1 } = await supabase.from('variacoes').delete().in('id', idsVar);
+          if (e1) return { sucesso: false, erro: e1.message };
+        }
         const { error } = await supabase.from('products').delete().eq('id', args.id);
         if (error) return { sucesso: false, erro: error.message };
         return { sucesso: true };
@@ -178,10 +183,14 @@ async function executar(nome, args) {
         return { sucesso: true, dados: data || [] };
       }
       case 'listar_pedidos': {
-        const { data, error } = await supabase.from('compras')
-          .select('*').order('"dateCreated"', { ascending: false }).limit(args?.limite || 10);
+        const { data, error } = await supabase.from('compras').select('*').limit(args?.limite || 50);
         if (error) return { sucesso: false, erro: error.message };
-        return { sucesso: true, dados: data || [] };
+        const ordenados = (data || []).sort((a, b) => {
+          const da = a.dateCreated || a.DateCreated || 0;
+          const db = b.dateCreated || b.DateCreated || 0;
+          return new Date(db) - new Date(da);
+        });
+        return { sucesso: true, dados: ordenados.slice(0, args?.limite || 10) };
       }
       case 'estatisticas_loja': {
         const [compras, products, users] = await Promise.all([
@@ -205,11 +214,8 @@ async function executar(nome, args) {
       case 'recomendar_ajuste_preco': {
         const { data: produtos, error: e1 } = await supabase.from('products').select('*');
         if (e1) return { sucesso: false, erro: e1.message };
-        const variacoes = await Promise.all((produtos || []).map(async p => {
-          const { data: v, error: e2 } = await supabase.from('variacoes').select('*').eq('"produtoId"', p.id);
-          return e2 ? [] : (v || []);
-        }));
-        const todas = variacoes.flat();
+        const { data: todasV } = await supabase.from('variacoes').select('*');
+        const todas = (todasV || []).filter(v => v.produtoId || v.productId);
         return { sucesso: true, dados: {
           total_produtos: produtos?.length || 0,
           precos: todas.map(v => ({ nome: v.nome, preco: v.preco, tipo: v.estoque_tipo })),

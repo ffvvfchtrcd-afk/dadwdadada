@@ -162,15 +162,15 @@ export default function GerenciarPedidos() {
     for (const p of pedidos) {
       const gid = p.groupId || p.id;
       if (!map.has(gid)) {
-        map.set(gid, { id: gid, pedidos: [], data: p.date, usuario: p.userName });
+        map.set(gid, { id: gid, pedidos: [], data: p.dateCreated, usuario: p.userName });
       }
       map.get(gid).pedidos.push(p);
     }
     // Sort groups by date
     const arr = Array.from(map.values());
     arr.sort((a, b) => {
-      const da = a.pedidos[0]?.date || '';
-      const db = b.pedidos[0]?.date || '';
+      const da = a.pedidos[0]?.dateCreated || '';
+      const db = b.pedidos[0]?.dateCreated || '';
       return ordem === 'antigo'
         ? new Date(da) - new Date(db)
         : new Date(db) - new Date(da);
@@ -359,9 +359,9 @@ export default function GerenciarPedidos() {
                         <span className="text-xs font-bold text-white">
                           {clientes.length === 1 ? clientes[0] : `${clientes.length} clientes`}
                         </span>
-                        {primeiroItem?.date && (
+                        {(primeiroItem?.dateCreated || primeiroItem?.date) && (
                           <span className="text-[10px] text-zinc-500">
-                            {new Date(primeiroItem.date).toLocaleString('pt-BR', {
+                            {new Date(primeiroItem.dateCreated || primeiroItem.date).toLocaleString('pt-BR', {
                               day: '2-digit', month: '2-digit', year: '2-digit',
                               hour: '2-digit', minute: '2-digit'
                             })}
@@ -505,7 +505,7 @@ export default function GerenciarPedidos() {
                       {detalhesPedido.metodoEntrega === 'AUTOMATICA' ? 'ENTREGA AUTOMÁTICA' : 'ENTREGA MANUAL'}
                     </span>
                   )},
-                  { label: 'Data', value: <span className="text-zinc-300">{detalhesPedido.date ? new Date(detalhesPedido.date).toLocaleString('pt-BR') : 'N/A'}</span> },
+                  { label: 'Data', value: <span className="text-zinc-300">{(detalhesPedido.dateCreated || detalhesPedido.date) ? new Date(detalhesPedido.dateCreated || detalhesPedido.date).toLocaleString('pt-BR') : 'N/A'}</span> },
                   ...(detalhesPedido.groupId
                     ? [{ label: 'Grupo', value: <code className="text-zinc-500 text-[10px] font-mono">{detalhesPedido.groupId}</code> }]
                     : []),

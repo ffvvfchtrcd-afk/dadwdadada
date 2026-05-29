@@ -14,48 +14,37 @@ export const ServicoPedidos = {
 
       for (const item of carrinho) {
         const pedidoId = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
-        const metodoEntrega = item.estoque_tipo === 'AUTOMATICA' ? 'AUTOMATICA' : 'MANUAL';
+        const totalItem = item.preco * (item.quantidade || 1);
 
-        const precoItem = item.preco * item.quantidade;
         const novoPedido = {
           id: pedidoId,
-          groupId,
-          userId: usuario.id,
+          userId: String(usuario.id),
+          userEmail: usuario.email || '',
           userName: usuario.nome,
-          productId: item.produto_id || item.produtoId,
-          productName: item.titulo,
-          variationId: item.variacao_id || `var_${item.produto_id || item.produtoId}`,
-          variationName: item.variation_name || 'Opção Padrão',
-          quantity: item.quantidade,
-          total: precoItem,
+          total: totalItem,
           status: 'AGUARDANDO_PAGAMENTO',
-          metodoEntrega: metodoEntrega,
+          items: [{
+            productId: item.produto_id || item.produtoId,
+            productName: item.titulo || item.nome,
+            variationId: item.variacao_id,
+            variationName: item.variation_name || item.variacao_nome || 'Opção Padrão',
+            quantity: item.quantidade || 1,
+            preco: item.preco,
+            estoque_tipo: item.estoque_tipo || 'MANUAL'
+          }],
           deliveryContent: ['Aguardando confirmação do pagamento...'],
-          date: new Date().toISOString(),
           timeline: [
             { status: 'CRIADO', label: 'Pedido Criado', date: new Date().toISOString() }
-          ]
+          ],
+          dateCreated: new Date().toISOString()
         };
-        if (totalComDesconto < precoItem && item.cupom) {
+        if (totalComDesconto < totalItem && item.cupom) {
           novoPedido.cupom = item.cupom;
-          novoPedido.desconto = precoItem - (totalComDesconto / carrinho.length);
+          novoPedido.desconto = totalItem - (totalComDesconto / carrinho.length);
         }
 
-        try {
-          const { error } = await supabase
-            .from('compras')
-            .insert([novoPedido]);
-          if (error) throw error;
-        } catch (err) {
-          // Fallback sem groupId se coluna não existir
-          if (err.message?.toLowerCase().includes('groupid')) {
-            delete novoPedido.groupId;
-            const { error: retry } = await supabase.from('compras').insert([novoPedido]);
-            if (retry) throw retry;
-          } else {
-            throw err;
-          }
-        }
+        const { error } = await supabase.from('compras').insert([novoPedido]);
+        if (error) throw error;
         criados.push(novoPedido);
       }
 
@@ -78,11 +67,14 @@ export const ServicoPedidos = {
       const { data, error } = await supabase
         .from('compras')
         .select('*')
-        .eq('userId', usuarioId)
-        .order('date', { ascending: false });
+        .limit(100);
 
       if (error) throw error;
-      return data || [];
+      return (data || []).sort((a, b) => {
+        const da = a.dateCreated || a.DateCreated || 0;
+        const db = b.dateCreated || b.DateCreated || 0;
+        return new Date(db) - new Date(da);
+      });
     } catch (erro) {
       console.error("Erro ao buscar pedidos do usuário:", erro);
       return [];
@@ -95,7 +87,7 @@ export const ServicoPedidos = {
       const { data, error } = await supabase
         .from('compras')
         .select('*')
-        .order('date', { ascending: false });
+        .limit(100);
 
       if (error) throw error;
       return data || [];
@@ -136,12 +128,14 @@ export const ServicoPedidos = {
 
       if (updateErr) throw updateErr;
 
-      // Executa entrega de acordo com o método
-      if (pedido.metodoEntrega === 'AUTOMATICA') {
+      const primeiroItem = pedido.items?.[0] || {};
+      const isAuto = primeiroItem.estoque_tipo === 'AUTOMATICA';
+
+      if (isAuto) {
         const entregaRes = await ServicoEntregas.processarEntregaAutomatica(
           pedidoId,
-          pedido.variationId,
-          pedido.quantity
+          primeiroItem.variationId,
+          primeiroItem.quantity
         );
         return { sucesso: true, entrega: entregaRes };
       } else {

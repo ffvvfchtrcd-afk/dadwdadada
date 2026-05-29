@@ -118,7 +118,7 @@ export default function MeusPedidos() {
                     Total pago: <strong className="text-gray-200">{FormatarMoeda(pedido.total)}</strong>
                   </p>
                   <p className="text-xs text-gray-400 mb-1">
-                    Data: <strong className="text-gray-200">{new Date(pedido.date).toLocaleString('pt-BR')}</strong>
+                    Data: <strong className="text-gray-200">{new Date(pedido.dateCreated || pedido.date).toLocaleString('pt-BR')}</strong>
                   </p>
                 </div>
 

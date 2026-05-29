@@ -171,7 +171,7 @@ export default function Perfil() {
                       <span>Total pago:</span> <strong className="text-emerald-400">{FormatarMoeda(pedido.total)}</strong>
                     </p>
                     <p className="flex justify-between border-b border-zinc-800/50 pb-1">
-                      <span>Data:</span> <strong className="text-zinc-300">{new Date(pedido.date).toLocaleString('pt-BR')}</strong>
+                      <span>Data:</span> <strong className="text-zinc-300">{new Date(pedido.dateCreated || pedido.date).toLocaleString('pt-BR')}</strong>
                     </p>
                   </div>
                 </div>
